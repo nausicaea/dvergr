@@ -25,7 +25,6 @@ services:
         target: /var/lib/minecraft/banned-players.json
     volumes:
       - minecraft-cache:/var/lib/minecraft/.cache
-      - minecraft-players:/var/lib/minecraft/players
       - minecraft-universe:/var/lib/minecraft/universe
     ports:
       - 25565/tcp
