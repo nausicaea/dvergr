@@ -3,17 +3,50 @@ services:
   minecraft:
     image: nausicaea/minecraft:latest
     build:
-      context: minecraft
+      context: minecraft-image
+      args:
+        MINECRAFT_VERSION: 1.20.1
+        MINECRAFT_SERVER_ID: nausicaea
     container_name: minecraft
     environment:
-      MINECRAFT_SERVER_ID: nausicaea
+      JAVA_MAX_MEM: 4G
+    configs:
+      - source: minecraft-logging
+        target: /var/lib/minecraft/log4j2.xml
+      - source: minecraft-server
+        target: /var/lib/minecraft/server.properties
+      - source: minecraft-operators
+        target: /var/lib/minecraft/ops.json
+      - source: minecraft-whitelist
+        target: /var/lib/minecraft/whitelist.json
+      - source: minecraft-banned-ips
+        target: /var/lib/minecraft/banned-ips.json
+      - source: minecraft-banned-players
+        target: /var/lib/minecraft/banned-players.json
     volumes:
       - minecraft-cache:/var/lib/minecraft/.cache
-      - minecraft-management:/var/lib/minecraft/management
+      - minecraft-players:/var/lib/minecraft/players
       - minecraft-universe:/var/lib/minecraft/universe
-    #restart: unless-stopped
+    ports:
+      - 25565/tcp
+      #restart: unless-stopped
+    cpus: 4
+    mem_limit: "4G"
+
+configs:
+  minecraft-logging:
+    file: ./minecraft-config/log4j2.xml
+  minecraft-server:
+    file: ./minecraft-config/server.properties
+  minecraft-operators:
+    file: ./minecraft-config/ops.json
+  minecraft-whitelist:
+    file: ./minecraft-config/whitelist.json
+  minecraft-banned-ips:
+    content: "[]"
+  minecraft-banned-players:
+    content: "[]"
 
 volumes:
   minecraft-cache: {}
-  minecraft-management: {}
   minecraft-universe: {}

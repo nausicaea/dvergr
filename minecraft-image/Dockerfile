@@ -1,5 +1,5 @@
 FROM docker.io/library/eclipse-temurin:21-jre-alpine@sha256:3f716d52e4045433e94a28d029c93d3c23179822a5d40b1c82b63aedd67c5081
-VOLUME ["/var/lib/minecraft/.cache", "/var/lib/minecraft/management", "/var/lib/minecraft/universe"]
+VOLUME ["/var/lib/minecraft/.cache", "/var/lib/minecraft/universe"]
 EXPOSE 25565/tcp
 ARG MINECRAFT_VERSION=1.21.1
 ARG MINECRAFT_SERVER_ID=minecraft
@@ -19,17 +19,9 @@ COPY <<-EOF quilt-server-launcher.properties
     serverJar=/usr/local/lib/minecraft/server.jar
 EOF
 COPY eula.txt eula.txt
-COPY log4j2.xml log4j2.xml
-COPY server.properties server.properties
 RUN <<-EOF
     set -ex;
     java -jar /usr/local/lib/minecraft/quilt-server-launch.jar --initSettings;
-    mkdir management;
-    touch management/ops.json management/whitelist.json management/banned-ips.json management/banned-players.json;
-    ln -s management/ops.json ops.json;
-    ln -s management/whitelist.json whitelist.json;
-    ln -s management/banned-ips.json banned-ips.json;
-    ln -s management/banned-players.json banned-players.json;
     mkdir universe;
     chown -R minecraft:minecraft .;
 EOF
