@@ -3,7 +3,7 @@ services:
   minecraft:
     image: nausicaea/minecraft:latest
     build:
-      context: minecraft-image
+      context: ./minecraft-image
       args:
         MINECRAFT_VERSION: 1.20.1
         MINECRAFT_SERVER_ID: nausicaea
@@ -24,8 +24,12 @@ services:
       - source: minecraft-banned-players
         target: /var/lib/minecraft/banned-players.json
     volumes:
-      - minecraft-cache:/var/lib/minecraft/.cache
-      - minecraft-universe:/var/lib/minecraft/universe
+      - type: volume
+        source: minecraft-cache
+        target: /var/lib/minecraft/.cache
+      - type: volume
+        source: minecraft-universe
+        target: /var/lib/minecraft/universe
     ports:
       - 25565:25565/tcp
     restart: always

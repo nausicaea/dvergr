@@ -3,63 +3,25 @@ VOLUME ["/var/lib/minecraft/.cache", "/var/lib/minecraft/universe"]
 EXPOSE 25565/tcp
 ARG MINECRAFT_VERSION=1.21.1
 ARG MINECRAFT_SERVER_ID=minecraft
+ENV MINECRAFT_SERVER_ID=${MINECRAFT_SERVER_ID}
 ENV JAVA_INITIAL_MEM=256m
 ENV JAVA_MAX_MEM=2g
 
 ADD --checksum=sha256:c3ad3e23eee860e5185c594e7cb280e4fabe7e766a83945381d9a99c64855c5b https://quiltmc.org/api/v1/download-latest-installer/java-universal /tmp/quilt-installer.jar
-RUN <<-EOF
-    set -ex;
-    addgroup -S minecraft;
-    adduser -S -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft;
-    java -jar /tmp/quilt-installer.jar install server ${MINECRAFT_VERSION} --download-server --install-dir=/usr/local/lib/minecraft;
+RUN set -xe; \
+    addgroup -S minecraft; \
+    adduser -S -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft; \
+    java -jar /tmp/quilt-installer.jar install server ${MINECRAFT_VERSION} --download-server --install-dir=/usr/local/lib/minecraft; \
     rm /tmp/quilt-installer.jar
-EOF
 
 WORKDIR /var/lib/minecraft
-COPY <<-EOF quilt-server-launcher.properties
-    serverJar=/usr/local/lib/minecraft/server.jar
-EOF
+COPY quilt-server-launcher.properties quilt-server-launcher.properties
 COPY eula.txt eula.txt
-RUN <<-EOF
-    set -ex;
-    java -jar /usr/local/lib/minecraft/quilt-server-launch.jar --initSettings;
-    mkdir universe;
-    chown -R minecraft:minecraft .;
-EOF
-COPY --chmod=0755 <<-"EOF" /bin/docker-entrypoint
-#!/bin/sh
-
-AIKAR_FLAGS=" \
-    -XX:+UseG1GC \
-    -XX:+ParallelRefProcEnabled \
-    -XX:MaxGCPauseMillis=200 \
-    -XX:+UnlockExperimentalVMOptions \
-    -XX:+DisableExplicitGC \
-    -XX:+AlwaysPreTouch \
-    -XX:G1NewSizePercent=30 \
-    -XX:G1MaxNewSizePercent=40 \
-    -XX:G1HeapRegionSize=8M \
-    -XX:G1ReservePercent=20 \
-    -XX:G1HeapWastePercent=5 \
-    -XX:G1MixedGCCountTarget=4 \
-    -XX:InitiatingHeapOccupancyPercent=15 \
-    -XX:G1MixedGCLiveThresholdPercent=90 \
-    -XX:G1RSetUpdatingPauseTimePercent=5 \
-    -XX:SurvivorRatio=32 \
-    -XX:+PerfDisableSharedMem \
-    -XX:MaxTenuringThreshold=1 \
-"
-
-exec java \
-    -Xms${JAVA_INITIAL_MEM} \
-    -Xmx${JAVA_MAX_MEM} \
-    ${AIKAR_FLAGS} \
-    -Dlog4j.configurationFile=/var/lib/minecraft/log4j2.xml \
-    -jar /usr/local/lib/minecraft/quilt-server-launch.jar \
-    --serverId ${MINECRAFT_SERVER_ID} \
-    --universe /var/lib/minecraft/universe \
-    --nogui
-EOF
+RUN set -xe; \
+    java -jar /usr/local/lib/minecraft/quilt-server-launch.jar --initSettings; \
+    mkdir universe; \
+    chown -R minecraft:minecraft .
+COPY --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
 
 USER minecraft:minecraft
 ENTRYPOINT ["/bin/docker-entrypoint"]
