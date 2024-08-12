@@ -28,7 +28,7 @@ services:
       - minecraft-universe:/var/lib/minecraft/universe
     ports:
       - 25565:25565/tcp
-    restart: unless-stopped
+    restart: always
     cpus: 4
     mem_limit: "4G"
 
