@@ -27,7 +27,7 @@ services:
       - minecraft-cache:/var/lib/minecraft/.cache
       - minecraft-universe:/var/lib/minecraft/universe
     ports:
-      - 25565/tcp
+      - 25565:25565/tcp
     restart: unless-stopped
     cpus: 4
     mem_limit: "4G"

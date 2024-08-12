@@ -12,6 +12,7 @@ RUN <<-EOF
     addgroup -S minecraft;
     adduser -S -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft;
     java -jar /tmp/quilt-installer.jar install server ${MINECRAFT_VERSION} --download-server --install-dir=/usr/local/lib/minecraft;
+    rm /tmp/quilt-installer.jar
 EOF
 
 WORKDIR /var/lib/minecraft
