@@ -1,0 +1,19 @@
+name: minecraft
+services:
+  minecraft:
+    image: nausicaea/minecraft:latest
+    build:
+      context: minecraft
+    container_name: minecraft
+    environment:
+      MINECRAFT_SERVER_ID: nausicaea
+    volumes:
+      - minecraft-cache:/var/lib/minecraft/.cache
+      - minecraft-management:/var/lib/minecraft/management
+      - minecraft-universe:/var/lib/minecraft/universe
+    #restart: unless-stopped
+
+volumes:
+  minecraft-cache: {}
+  minecraft-management: {}
+  minecraft-universe: {}
