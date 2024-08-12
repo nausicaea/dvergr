@@ -19,7 +19,6 @@ COPY quilt-server-launcher.properties quilt-server-launcher.properties
 COPY eula.txt eula.txt
 RUN set -xe; \
     java -jar /usr/local/lib/minecraft/quilt-server-launch.jar --initSettings; \
-    mkdir universe; \
     chown -R minecraft:minecraft .
 COPY --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
 
