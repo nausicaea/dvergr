@@ -30,6 +30,9 @@ services:
       - type: volume
         source: minecraft-universe
         target: /var/lib/minecraft/universe
+      - type: volume
+        source: minecraft-mod-config
+        target: /var/lib/minecraft/config
     ports:
       - 25565:25565/tcp
     restart: always
@@ -53,3 +56,4 @@ configs:
 volumes:
   minecraft-cache: {}
   minecraft-universe: {}
+  minecraft-mod-config: {}

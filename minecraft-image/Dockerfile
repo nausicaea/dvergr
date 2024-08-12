@@ -1,5 +1,5 @@
 FROM docker.io/library/eclipse-temurin:21-jre-alpine@sha256:3f716d52e4045433e94a28d029c93d3c23179822a5d40b1c82b63aedd67c5081
-VOLUME ["/var/lib/minecraft/.cache", "/var/lib/minecraft/universe"]
+VOLUME ["/var/lib/minecraft/.cache", "/var/lib/minecraft/universe", "/var/lib/minecraft/config"]
 EXPOSE 25565/tcp
 ARG MINECRAFT_VERSION=1.21.1
 ARG MINECRAFT_SERVER_ID=minecraft
@@ -17,8 +17,16 @@ RUN set -xe; \
 WORKDIR /var/lib/minecraft
 COPY quilt-server-launcher.properties quilt-server-launcher.properties
 COPY eula.txt eula.txt
+COPY mods.tgz /tmp/mods.tgz
+COPY config.tgz /tmp/config.tgz
 RUN set -xe; \
+    mkdir -p config; \
+    mkdir -p mods; \
+    mkdir -p universe; \
+    tar -xf /tmp/mods.tgz -C mods; \
+    tar -xf /tmp/config.tgz -C config; \
     java -jar /usr/local/lib/minecraft/quilt-server-launch.jar --initSettings; \
+    rm /tmp/mods.tgz /tmp/config.tgz; \
     chown -R minecraft:minecraft .
 COPY --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
 
