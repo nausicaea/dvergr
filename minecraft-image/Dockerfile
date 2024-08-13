@@ -17,16 +17,11 @@ RUN set -xe; \
 WORKDIR /var/lib/minecraft
 COPY quilt-server-launcher.properties quilt-server-launcher.properties
 COPY eula.txt eula.txt
-COPY mods.tgz /tmp/mods.tgz
-COPY config.tgz /tmp/config.tgz
+COPY mods mods
+COPY config config
 RUN set -xe; \
-    mkdir -p config; \
-    mkdir -p mods; \
     mkdir -p universe; \
-    tar -xf /tmp/mods.tgz -C mods; \
-    tar -xf /tmp/config.tgz -C config; \
     java -jar /usr/local/lib/minecraft/quilt-server-launch.jar --initSettings; \
-    rm /tmp/mods.tgz /tmp/config.tgz; \
     chown -R minecraft:minecraft .
 COPY --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
 
