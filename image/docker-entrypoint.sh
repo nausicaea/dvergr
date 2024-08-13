@@ -25,7 +25,7 @@ exec java \
     -Xms${JAVA_INITIAL_MEM} \
     -Xmx${JAVA_MAX_MEM} \
     ${AIKAR_FLAGS} \
-    -Dlog4j.configurationFile=/var/lib/minecraft/log4j2.xml \
+    -Dlog4j.configurationFile=/var/lib/minecraft/server/log4j2.xml \
     -jar /usr/local/lib/minecraft/quilt-server-launch.jar \
     --serverId ${MINECRAFT_SERVER_ID} \
     --universe /var/lib/minecraft/universe \

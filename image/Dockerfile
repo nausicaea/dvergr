@@ -1,6 +1,6 @@
 FROM docker.io/library/eclipse-temurin:21-jre-alpine@sha256:3f716d52e4045433e94a28d029c93d3c23179822a5d40b1c82b63aedd67c5081
-VOLUME ["/var/lib/minecraft/.cache", "/var/lib/minecraft/universe", "/var/lib/minecraft/config"]
-EXPOSE 25565/tcp
+VOLUME ["/var/lib/minecraft/.cache", "/var/lib/minecraft/audioplayer_uploads", "/var/lib/minecraft/backups", "/var/lib/minecraft/config", "/var/lib/minecraft/logs", "/var/lib/minecraft/players", "/var/lib/minecraft/server", "/var/lib/minecraft/universe"]
+EXPOSE 25565/tcp 24454/udp
 ARG MINECRAFT_VERSION=1.21.1
 ARG MINECRAFT_SERVER_ID=minecraft
 ENV MINECRAFT_SERVER_ID=${MINECRAFT_SERVER_ID}
@@ -15,12 +15,21 @@ RUN set -xe; \
     rm /tmp/quilt-installer.jar
 
 WORKDIR /var/lib/minecraft
-COPY quilt-server-launcher.properties quilt-server-launcher.properties
-COPY eula.txt eula.txt
+COPY quilt-server-launcher.properties eula.txt ./
 COPY mods mods
 COPY config config
+WORKDIR /var/lib/minecraft/server
+COPY log4j2.xml server.properties ./
+WORKDIR /var/lib/minecraft/players
+COPY ops.json whitelist.json banned-ips.json banned-players.json ./
+WORKDIR /var/lib/minecraft
 RUN set -xe; \
-    mkdir -p universe; \
+    mkdir -p .cache audioplayer_uploads backups logs universe; \
+    ln -s server/server.properties server.properties; \
+    ln -s players/ops.json ops.json; \
+    ln -s players/whitelist.json whitelist.json; \
+    ln -s players/banned-ips.json banned-ips.json; \
+    ln -s players/banned-players.json banned-players.json; \
     java -jar /usr/local/lib/minecraft/quilt-server-launch.jar --initSettings; \
     chown -R minecraft:minecraft .
 COPY --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint

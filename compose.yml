@@ -10,50 +10,45 @@ services:
     container_name: minecraft
     environment:
       JAVA_MAX_MEM: 4G
-    configs:
-      - source: minecraft-logging
-        target: /var/lib/minecraft/log4j2.xml
-      - source: minecraft-server
-        target: /var/lib/minecraft/server.properties
-      - source: minecraft-operators
-        target: /var/lib/minecraft/ops.json
-      - source: minecraft-whitelist
-        target: /var/lib/minecraft/whitelist.json
-      - source: minecraft-banned-ips
-        target: /var/lib/minecraft/banned-ips.json
-      - source: minecraft-banned-players
-        target: /var/lib/minecraft/banned-players.json
     volumes:
+      - type: volume
+        source: audioplayer_uploads
+        target: /var/lib/minecraft/audioplayer_uploads
+      - type: volume
+        source: backups
+        target: /var/lib/minecraft/backups
       - type: volume
         source: cache
         target: /var/lib/minecraft/.cache
       - type: volume
+        source: mod_config
+        target: /var/lib/minecraft/config
+      - type: volume
+        source: logs
+        target: /var/lib/minecraft/logs
+      - type: volume
+        source: players
+        target: /var/lib/minecraft/players
+      - type: volume
+        source: server_config
+        target: /var/lib/minecraft/server
+        read_only: true
+      - type: volume
         source: universe
         target: /var/lib/minecraft/universe
-      - type: volume
-        source: mod-config
-        target: /var/lib/minecraft/config
     ports:
       - 25565:25565/tcp
+      - 24454:24454/udp
     restart: always
     cpus: 4
     mem_limit: "4G"
 
-configs:
-  minecraft-logging:
-    file: ./config/log4j2.xml
-  minecraft-server:
-    file: ./config/server.properties
-  minecraft-operators:
-    file: ./config/ops.json
-  minecraft-whitelist:
-    file: ./config/whitelist.json
-  minecraft-banned-ips:
-    content: "[]"
-  minecraft-banned-players:
-    content: "[]"
-
 volumes:
+  audioplayer_uploads: {}
+  backups: {}
   cache: {}
+  logs: {}
+  mod_config: {}
+  players: {}
+  server_config: {}
   universe: {}
-  mod-config: {}
