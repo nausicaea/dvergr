@@ -3,7 +3,7 @@ services:
   minecraft:
     image: nausicaea/minecraft:latest
     build:
-      context: ./minecraft-image
+      context: ./image
       args:
         MINECRAFT_VERSION: 1.20.1
         MINECRAFT_SERVER_ID: nausicaea
@@ -25,13 +25,13 @@ services:
         target: /var/lib/minecraft/banned-players.json
     volumes:
       - type: volume
-        source: minecraft-cache
+        source: cache
         target: /var/lib/minecraft/.cache
       - type: volume
-        source: minecraft-universe
+        source: universe
         target: /var/lib/minecraft/universe
       - type: volume
-        source: minecraft-mod-config
+        source: mod-config
         target: /var/lib/minecraft/config
     ports:
       - 25565:25565/tcp
@@ -41,19 +41,19 @@ services:
 
 configs:
   minecraft-logging:
-    file: ./minecraft-config/log4j2.xml
+    file: ./config/log4j2.xml
   minecraft-server:
-    file: ./minecraft-config/server.properties
+    file: ./config/server.properties
   minecraft-operators:
-    file: ./minecraft-config/ops.json
+    file: ./config/ops.json
   minecraft-whitelist:
-    file: ./minecraft-config/whitelist.json
+    file: ./config/whitelist.json
   minecraft-banned-ips:
     content: "[]"
   minecraft-banned-players:
     content: "[]"
 
 volumes:
-  minecraft-cache: {}
-  minecraft-universe: {}
-  minecraft-mod-config: {}
+  cache: {}
+  universe: {}
+  mod-config: {}
