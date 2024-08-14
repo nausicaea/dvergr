@@ -2,13 +2,18 @@ FROM docker.io/library/eclipse-temurin:21-jre-alpine@sha256:3f716d52e4045433e94a
 VOLUME ["/var/lib/minecraft/.cache", "/var/lib/minecraft/audioplayer_uploads", "/var/lib/minecraft/backups", "/var/lib/minecraft/config", "/var/lib/minecraft/logs", "/var/lib/minecraft/players", "/var/lib/minecraft/server", "/var/lib/minecraft/universe"]
 EXPOSE 25565/tcp 24454/udp
 ARG MINECRAFT_VERSION=1.21.1
-ARG MINECRAFT_SERVER_ID=minecraft
-ENV MINECRAFT_SERVER_ID=${MINECRAFT_SERVER_ID}
-ENV JAVA_INITIAL_MEM=256m
-ENV JAVA_MAX_MEM=2g
+ENV MINECRAFT_SERVER_ID=minecraft
+ENV JAVA_INITIAL_MEM=256M
+ENV JAVA_MAX_MEM=2G
+ENV OTEL_JAVAAGENT_DEBUG=false
+ENV OTEL_TRACES_EXPORTER=otlp
+ENV OTEL_METRICS_EXPORTER=prometheus
+ENV OTEL_LOGS_EXPORTER=otlp
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://otel_collector:4317
+ENV OTEL_EXPORTER_PROMETHEUS_HOST=0.0.0.0
 
 ADD --checksum=sha256:c3ad3e23eee860e5185c594e7cb280e4fabe7e766a83945381d9a99c64855c5b https://quiltmc.org/api/v1/download-latest-installer/java-universal /tmp/quilt-installer.jar
-ADD --checksum=sha256:5503479959d29a5eefe40802457bd4aa9e188fddd8142f138473fe721e777749 https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.33.5/opentelemetry-javaagent.jar /usr/local/lib/opentelemetry-javaagent.jar
+ADD --checksum=sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce --chmod=0644 https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.33.5/opentelemetry-javaagent.jar /usr/local/lib/opentelemetry-javaagent.jar
 RUN set -xe; \
     addgroup -S minecraft; \
     adduser -S -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft; \

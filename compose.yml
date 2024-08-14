@@ -3,12 +3,13 @@ services:
   minecraft:
     image: nausicaea/minecraft:latest
     build:
-      context: ./image
+      context: minecraft
       args:
         MINECRAFT_VERSION: 1.20.1
-        MINECRAFT_SERVER_ID: nausicaea
     container_name: minecraft
     environment:
+      MINECRAFT_SERVER_ID: nausicaea
+      JAVA_INITIAL_MEM: 256M
       JAVA_MAX_MEM: 4G
     volumes:
       - type: volume
@@ -43,6 +44,102 @@ services:
     cpus: 4
     mem_limit: "4G"
 
+  otel_collector:
+    image: docker.io/otel/opentelemetry-collector:latest
+    container_name: otel_collector
+    command: 
+      - --config=/etc/otel-collector.yaml
+    volumes:
+      - type: bind
+        source: ./otel/otel-collector.yaml
+        target: /etc/otel-collector.yaml
+
+  tempo_setup:
+    image: &tempo docker.io/grafana/tempo:latest
+    container_name: tempo_setup
+    user: root
+    entrypoint:
+      - chown
+      - "-R"
+      - "10001:10001"
+      - /var/tempo
+    volumes:
+      - tempo:/var/tempo
+
+  tempo:
+    image: *tempo
+    container_name: tempo
+    command: 
+      - --config.file=/etc/tempo.yaml
+    volumes:
+      - type: bind
+        source: ./tempo/tempo.yaml
+        target: /etc/tempo.yaml
+      - type: volume
+        source: tempo
+        target: /var/tempo
+    depends_on:
+      - tempo_setup
+
+  loki_setup:
+    image: &loki docker.io/grafana/loki:latest
+    container_name: loki_setup
+    user: root
+    entrypoint:
+      - chown
+      - "-R"
+      - "10001:10001"
+      - /var/loki
+    volumes:
+      - loki:/var/loki
+
+  loki:
+    image: *loki
+    container_name: loki
+    command: 
+      - --config.file=/etc/loki.yaml
+    volumes:
+      - type: bind
+        source: ./loki/loki.yaml
+        target: /etc/loki.yaml
+      - type: volume
+        source: loki
+        target: /var/loki
+    depends_on:
+      - loki_setup
+
+  prometheus:
+    image: docker.io/prom/prometheus:latest
+    container_name: prometheus
+    command: 
+      - --config.file=/etc/prometheus.yaml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+      - --enable-feature=native-histograms
+    volumes:
+      - type: bind
+        source: ./prometheus/prometheus.yaml
+        target: /etc/prometheus.yaml
+    ports:
+      - 127.0.0.1:9090:9090/tcp
+
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    container_name: grafana
+    environment:
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_ANONYMOUS_ENABLED: true
+      GF_AUTH_DISABLE_LOGIN_FORM: true
+      GF_AUTH_BASIC_ENABLED: false
+      GF_FEATURE_TOGGLES_ENABLE: accessControlOnCall,traceqlEditor
+      GF_INSTALL_PLUGINS: https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/grafana-lokiexplore-app-latest.zip;grafana-lokiexplore-app
+    volumes:
+      - type: bind
+        source: ./grafana
+        target: /etc/grafana/provisioning
+    ports:
+      - 127.0.0.1:3000:3000/tcp
+
 volumes:
   audioplayer_uploads: {}
   backups: {}
@@ -52,3 +149,5 @@ volumes:
   players: {}
   server_config: {}
   universe: {}
+  tempo: {}
+  loki: {}
