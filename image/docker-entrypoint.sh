@@ -21,11 +21,14 @@ AIKAR_FLAGS=" \
     -XX:MaxTenuringThreshold=1 \
 "
 
+export SENTRY_PROPERTIES_FILE=/var/lib/minecraft/server/sentry.properties
+
 exec java \
     -Xms${JAVA_INITIAL_MEM} \
     -Xmx${JAVA_MAX_MEM} \
     ${AIKAR_FLAGS} \
     -Dlog4j.configurationFile=/var/lib/minecraft/server/log4j2.xml \
+    -javaagent /usr/local/lib/sentry-opentelemetry-javaagent.jar \
     -jar /usr/local/lib/minecraft/quilt-server-launch.jar \
     --serverId ${MINECRAFT_SERVER_ID} \
     --universe /var/lib/minecraft/universe \
