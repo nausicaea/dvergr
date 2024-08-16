@@ -10,13 +10,6 @@ ENV JAVA_MAX_MEM=2G
 
 ADD --link --checksum=sha256:c3ad3e23eee860e5185c594e7cb280e4fabe7e766a83945381d9a99c64855c5b https://quiltmc.org/api/v1/download-latest-installer/java-universal /tmp/quilt-installer.jar
 ADD --link --checksum=sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce --chmod=0644 https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.33.5/opentelemetry-javaagent.jar /usr/local/lib/
-ADD --link --checksum=sha256:93dd11528af33d51086e4340720341a3a8b978771e1750f3f2dd6903e854f1de --chmod=0644 https://repo1.maven.org/maven2/io/opentelemetry/instrumentation/opentelemetry-log4j-appender-2.17/2.6.0-alpha/opentelemetry-log4j-appender-2.17-2.6.0-alpha.jar /usr/local/lib/
-ADD --link --checksum=sha256:7d3cd0cf6bdcb2f8372494a60ebf76b16770067c26726d47ca8aa639ca6a7d1a --chmod=0644 https://repo1.maven.org/maven2/io/opentelemetry/opentelemetry-api/1.40.0/opentelemetry-api-1.40.0.jar /usr/local/lib/
-ADD --link --checksum=sha256:407824792c3e13a3515fd22351542089e733c70267ddac015d707efe757ec92b --chmod=0644 https://repo1.maven.org/maven2/io/opentelemetry/opentelemetry-api-incubator/1.40.0-alpha/opentelemetry-api-incubator-1.40.0-alpha.jar /usr/local/lib/
-ADD --link --checksum=sha256:5c0452a133f76872bed5bbd685c7f9515b15d43db8a46b2f8ca8409a390bf424 --chmod=0644 https://repo1.maven.org/maven2/io/opentelemetry/opentelemetry-context/1.40.0/opentelemetry-context-1.40.0.jar /usr/local/lib/
-ADD --link --checksum=sha256:818dd23b5b9415a99bf5395ace86ca36feb6321e11ad70ef9ceb1369d87d963f --chmod=0644 https://repo1.maven.org/maven2/io/opentelemetry/instrumentation/opentelemetry-instrumentation-api/2.6.0/opentelemetry-instrumentation-api-2.6.0.jar /usr/local/lib/
-ADD --link --checksum=sha256:831d671bafa8ed83ae3b9a47f1066aaae533567388459555db82ff3a9e986cfe --chmod=0644 https://repo1.maven.org/maven2/io/opentelemetry/instrumentation/opentelemetry-instrumentation-api-incubator/2.6.0-alpha/opentelemetry-instrumentation-api-incubator-2.6.0-alpha.jar /usr/local/lib/
-ADD --link --checksum=sha256:745a86a75ecb5e03f464f05ea2dc76e0f04d07273c5509fa74f393bff9b222b7 --chmod=0644 https://repo1.maven.org/maven2/io/opentelemetry/semconv/opentelemetry-semconv/1.25.0-alpha/opentelemetry-semconv-1.25.0-alpha.jar /usr/local/lib/
 RUN set -xe; \
     addgroup -S minecraft; \
     adduser -S -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft; \
