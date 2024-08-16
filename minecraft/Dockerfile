@@ -34,8 +34,6 @@ WORKDIR /var/lib/minecraft
 COPY quilt-server-launcher.properties eula.txt ./
 COPY log4j2.xml server.properties opentelemetry.properties ./
 COPY ops.json whitelist.json banned-ips.json banned-players.json ./
-COPY mods mods
-COPY config config
 RUN set -xe; \
     mkdir -p .cache audioplayer_uploads backups logs universe; \
     java \

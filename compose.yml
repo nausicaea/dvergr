@@ -10,7 +10,7 @@ services:
     environment:
       MINECRAFT_SERVER_ID: nausicaea
       JAVA_INITIAL_MEM: 256M
-      JAVA_MAX_MEM: 6G
+      JAVA_MAX_MEM: 4G
     volumes:
       - ./minecraft/log4j2.xml:/var/lib/minecraft/log4j2.xml
       - ./minecraft/server.properties:/var/lib/minecraft/server.properties
@@ -19,10 +19,11 @@ services:
       - ./minecraft/whitelist.json:/var/lib/minecraft/whitelist.json
       - ./minecraft/banned-ips.json:/var/lib/minecraft/banned-ips.json
       - ./minecraft/banned-players.json:/var/lib/minecraft/banned-players.json
+      - ./minecraft/config:/var/lib/minecraft/config
+      #- ./minecraft/mods:/var/lib/minecraft/mods
       - audioplayer_uploads:/var/lib/minecraft/audioplayer_uploads
       - backups:/var/lib/minecraft/backups
       - cache:/var/lib/minecraft/.cache
-      - mod_config:/var/lib/minecraft/config
       - logs:/var/lib/minecraft/logs
       - universe:/var/lib/minecraft/universe
     ports:
@@ -117,7 +118,6 @@ volumes:
   backups: {}
   cache: {}
   logs: {}
-  mod_config: {}
   universe: {}
   tempo: {}
   loki: {}
