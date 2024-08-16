@@ -7,9 +7,6 @@ ARG MINECRAFT_VERSION=1.21.1
 ENV MINECRAFT_SERVER_ID=minecraft
 ENV JAVA_INITIAL_MEM=256M
 ENV JAVA_MAX_MEM=2G
-ENV OTEL_JAVAAGENT_DEBUG=false
-ENV OTEL_EXPORTER=otlp
-ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://otel_collector:4317
 
 ADD --link --checksum=sha256:c3ad3e23eee860e5185c594e7cb280e4fabe7e766a83945381d9a99c64855c5b https://quiltmc.org/api/v1/download-latest-installer/java-universal /tmp/quilt-installer.jar
 ADD --link --checksum=sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce --chmod=0644 https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.33.5/opentelemetry-javaagent.jar /usr/local/lib/
