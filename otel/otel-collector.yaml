@@ -3,9 +3,12 @@ receivers:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
+
+processors:
+  batch: {}
+
 exporters:
-  debug:
-    verbosity: detailed
+  debug: {}
   otlp/traces:
     endpoint: tempo:4317
     tls:
@@ -14,18 +17,20 @@ exporters:
     endpoint: http://prometheus:9090/api/v1/write
     tls:
       insecure: true
-  otlp/logs:
-    endpoint: loki:3100
-    tls:
-      insecure: true
+  otlphttp/logs:
+    endpoint: http://loki:3100/otlp
+
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp/traces]
+      processors: [batch]
+      exporters: [debug, otlp/traces]
     metrics:
       receivers: [otlp]
-      exporters: [prometheusremotewrite]
+      processors: [batch]
+      exporters: [debug, prometheusremotewrite]
     logs:
       receivers: [otlp]
-      exporters: [otlp/logs]
+      processors: [batch]
+      exporters: [debug, otlphttp/logs]

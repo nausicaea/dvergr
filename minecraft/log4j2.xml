@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration>
+<Configuration packages="io.opentelemetry.instrumentation.log4j.appender.v2_17">
     <Appenders>
+        <OpenTelemetry name="OpenTelemetryAppender"/>
         <Console name="console" target="SYSTEM_ERR">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%level] %msg%n" />
         </Console>
     </Appenders>
     <Loggers>
-        <Root>
+        <Root level="All">
             <AppenderRef ref="console" level="warn"/>
+            <AppenderRef ref="OpenTelemetryAppender" level="All"/>
         </Root>
     </Loggers>
 </Configuration>

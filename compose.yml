@@ -10,39 +10,25 @@ services:
     environment:
       MINECRAFT_SERVER_ID: nausicaea
       JAVA_INITIAL_MEM: 256M
-      JAVA_MAX_MEM: 4G
+      JAVA_MAX_MEM: 6G
     volumes:
-      - type: volume
-        source: audioplayer_uploads
-        target: /var/lib/minecraft/audioplayer_uploads
-      - type: volume
-        source: backups
-        target: /var/lib/minecraft/backups
-      - type: volume
-        source: cache
-        target: /var/lib/minecraft/.cache
-      - type: volume
-        source: mod_config
-        target: /var/lib/minecraft/config
-      - type: volume
-        source: logs
-        target: /var/lib/minecraft/logs
-      - type: volume
-        source: players
-        target: /var/lib/minecraft/players
-      - type: volume
-        source: server_config
-        target: /var/lib/minecraft/server
-        read_only: true
-      - type: volume
-        source: universe
-        target: /var/lib/minecraft/universe
+      - ./minecraft/log4j2.xml:/var/lib/minecraft/log4j2.xml
+      - ./minecraft/server.properties:/var/lib/minecraft/server.properties
+      - ./minecraft/opentelemetry.properties:/var/lib/minecraft/opentelemetry.properties
+      - ./minecraft/ops.json:/var/lib/minecraft/ops.json
+      - ./minecraft/whitelist.json:/var/lib/minecraft/whitelist.json
+      - ./minecraft/banned-ips.json:/var/lib/minecraft/banned-ips.json
+      - ./minecraft/banned-players.json:/var/lib/minecraft/banned-players.json
+      - audioplayer_uploads:/var/lib/minecraft/audioplayer_uploads
+      - backups:/var/lib/minecraft/backups
+      - cache:/var/lib/minecraft/.cache
+      - mod_config:/var/lib/minecraft/config
+      - logs:/var/lib/minecraft/logs
+      - universe:/var/lib/minecraft/universe
     ports:
       - 25565:25565/tcp
       - 24454:24454/udp
     restart: always
-    cpus: 4
-    mem_limit: "4G"
 
   otel_collector:
     image: docker.io/otel/opentelemetry-collector:latest
@@ -50,9 +36,7 @@ services:
     command: 
       - --config=/etc/otel-collector.yaml
     volumes:
-      - type: bind
-        source: ./otel/otel-collector.yaml
-        target: /etc/otel-collector.yaml
+      - ./otel/otel-collector.yaml:/etc/otel-collector.yaml
 
   tempo_setup:
     image: &tempo docker.io/grafana/tempo:latest
@@ -72,17 +56,13 @@ services:
     command: 
       - --config.file=/etc/tempo.yaml
     volumes:
-      - type: bind
-        source: ./tempo/tempo.yaml
-        target: /etc/tempo.yaml
-      - type: volume
-        source: tempo
-        target: /var/tempo
+      - ./tempo/tempo.yaml:/etc/tempo.yaml
+      - tempo:/var/tempo
     depends_on:
       - tempo_setup
 
   loki_setup:
-    image: &loki docker.io/grafana/loki:latest
+    image: &loki docker.io/grafana/loki:3.1.1
     container_name: loki_setup
     user: root
     entrypoint:
@@ -99,12 +79,8 @@ services:
     command: 
       - --config.file=/etc/loki.yaml
     volumes:
-      - type: bind
-        source: ./loki/loki.yaml
-        target: /etc/loki.yaml
-      - type: volume
-        source: loki
-        target: /var/loki
+      - ./loki/loki.yaml:/etc/loki.yaml
+      - loki:/var/loki
     depends_on:
       - loki_setup
 
@@ -117,9 +93,7 @@ services:
       - --enable-feature=exemplar-storage
       - --enable-feature=native-histograms
     volumes:
-      - type: bind
-        source: ./prometheus/prometheus.yaml
-        target: /etc/prometheus.yaml
+      - ./prometheus/prometheus.yaml:/etc/prometheus.yaml
     ports:
       - 127.0.0.1:9090:9090/tcp
 
@@ -134,9 +108,7 @@ services:
       GF_FEATURE_TOGGLES_ENABLE: accessControlOnCall,traceqlEditor
       GF_INSTALL_PLUGINS: https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/grafana-lokiexplore-app-latest.zip;grafana-lokiexplore-app
     volumes:
-      - type: bind
-        source: ./grafana
-        target: /etc/grafana/provisioning
+      - ./grafana:/etc/grafana/provisioning
     ports:
       - 127.0.0.1:3000:3000/tcp
 
@@ -146,8 +118,6 @@ volumes:
   cache: {}
   logs: {}
   mod_config: {}
-  players: {}
-  server_config: {}
   universe: {}
   tempo: {}
   loki: {}

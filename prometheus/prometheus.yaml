@@ -19,7 +19,3 @@ scrape_configs:
     static_configs:
       - targets:
         - otel_collector:8888
-  - job_name: minecraft
-    static_configs:
-      - targets:
-        - minecraft:9464
