@@ -31,6 +31,7 @@ services:
       - 25565:25565/tcp
       - 24454:24454/udp
     restart: always
+    mem_limit: 5G
 
   otel_collector:
     image: docker.io/otel/opentelemetry-collector:latest
@@ -96,8 +97,7 @@ services:
       - --enable-feature=native-histograms
     volumes:
       - ./prometheus/prometheus.yaml:/etc/prometheus.yaml
-    ports:
-      - 127.0.0.1:9090:9090/tcp
+      - prometheus:/prometheus
 
   grafana:
     image: docker.io/grafana/grafana:latest
@@ -111,8 +111,9 @@ services:
       GF_INSTALL_PLUGINS: https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/grafana-lokiexplore-app-latest.zip;grafana-lokiexplore-app
     volumes:
       - ./grafana:/etc/grafana/provisioning
+      - grafana:/var/lib/grafana
     ports:
-      - 127.0.0.1:3000:3000/tcp
+      - 3000:3000/tcp
 
 volumes:
   audioplayer_uploads: {}
@@ -122,3 +123,5 @@ volumes:
   universe: {}
   tempo: {}
   loki: {}
+  prometheus: {}
+  grafana: {}
