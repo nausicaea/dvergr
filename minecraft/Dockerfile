@@ -29,7 +29,7 @@ RUN set -xe; \
 WORKDIR /var/lib/minecraft
 COPY quilt-server-launcher.properties eula.txt log4j2.xml opentelemetry.properties ./
 COPY server.properties ops.json whitelist.json banned-ips.json banned-players.json ./
-COPY --from=builder /src/build/libs/otel-1.0.0.jar ./mods/
+COPY --from=builder /src/build/libs/otel-1.0.0.jar ./builtin_mods/
 RUN set -xe; \
     mkdir -p .cache audioplayer_uploads backups logs universe; \
     java \

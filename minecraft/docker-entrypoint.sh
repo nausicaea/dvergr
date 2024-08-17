@@ -32,6 +32,8 @@ JAVA_OPTS=" \
     -javaagent:/usr/local/lib/opentelemetry-javaagent.jar \
 "
 
+cp /var/lib/minecraft/builtin_mods/otel-1.0.0.jar /var/lib/minecraft/mods/otel-1.0.0.jar
+
 exec java \
     ${JAVA_OPTS} \
     -jar /usr/local/lib/minecraft/quilt-server-launch.jar \

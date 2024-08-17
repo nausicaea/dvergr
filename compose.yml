@@ -13,15 +13,15 @@ services:
       JAVA_MAX_MEM: 4G
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel_collector:4317
     volumes:
-      - ./minecraft/log4j2.xml:/var/lib/minecraft/log4j2.xml
+      - ./minecraft/log4j2.xml:/var/lib/minecraft/log4j2.xml:ro
+      - ./minecraft/opentelemetry.properties:/var/lib/minecraft/opentelemetry.properties:ro
       - ./minecraft/server.properties:/var/lib/minecraft/server.properties
-      - ./minecraft/opentelemetry.properties:/var/lib/minecraft/opentelemetry.properties
       - ./minecraft/ops.json:/var/lib/minecraft/ops.json
       - ./minecraft/whitelist.json:/var/lib/minecraft/whitelist.json
       - ./minecraft/banned-ips.json:/var/lib/minecraft/banned-ips.json
       - ./minecraft/banned-players.json:/var/lib/minecraft/banned-players.json
       - ./minecraft/config:/var/lib/minecraft/config
-      #- ./minecraft/mods:/var/lib/minecraft/mods
+      - ./minecraft/mods:/var/lib/minecraft/mods
       - audioplayer_uploads:/var/lib/minecraft/audioplayer_uploads
       - backups:/var/lib/minecraft/backups
       - cache:/var/lib/minecraft/.cache
@@ -39,7 +39,7 @@ services:
     command: 
       - --config=/etc/otel-collector.yaml
     volumes:
-      - ./otel/otel-collector.yaml:/etc/otel-collector.yaml
+      - ./otel/otel-collector.yaml:/etc/otel-collector.yaml:ro
 
   tempo_setup:
     image: &tempo docker.io/grafana/tempo:latest
@@ -59,7 +59,7 @@ services:
     command: 
       - --config.file=/etc/tempo.yaml
     volumes:
-      - ./tempo/tempo.yaml:/etc/tempo.yaml
+      - ./tempo/tempo.yaml:/etc/tempo.yaml:ro
       - tempo:/var/tempo
     depends_on:
       - tempo_setup
@@ -82,7 +82,7 @@ services:
     command: 
       - --config.file=/etc/loki.yaml
     volumes:
-      - ./loki/loki.yaml:/etc/loki.yaml
+      - ./loki/loki.yaml:/etc/loki.yaml:ro
       - loki:/var/loki
     depends_on:
       - loki_setup
@@ -96,7 +96,7 @@ services:
       - --enable-feature=exemplar-storage
       - --enable-feature=native-histograms
     volumes:
-      - ./prometheus/prometheus.yaml:/etc/prometheus.yaml
+      - ./prometheus/prometheus.yaml:/etc/prometheus.yaml:ro
       - prometheus:/prometheus
 
   grafana:
@@ -110,7 +110,7 @@ services:
       GF_FEATURE_TOGGLES_ENABLE: accessControlOnCall,traceqlEditor
       GF_INSTALL_PLUGINS: https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/grafana-lokiexplore-app-latest.zip;grafana-lokiexplore-app
     volumes:
-      - ./grafana:/etc/grafana/provisioning
+      - ./grafana:/etc/grafana/provisioning:ro
       - grafana:/var/lib/grafana
     ports:
       - 3000:3000/tcp
