@@ -1,11 +1,27 @@
 name: minecraft
 services:
-  minecraft:
-    image: nausicaea/minecraft:latest
+  minecraft_setup:
+    image: &minecraft nausicaea/minecraft:latest
     build:
       context: minecraft
       args:
         MINECRAFT_VERSION: 1.20.1
+    container_name: minecraft_setup
+    user: root
+    entrypoint: 
+      - chown
+      - "-R"
+      - "minecraft:minecraft"
+      - /var/lib/minecraft
+    volumes:
+      - audioplayer_uploads:/var/lib/minecraft/audioplayer_uploads
+      - backups:/var/lib/minecraft/backups
+      - cache:/var/lib/minecraft/.cache
+      - logs:/var/lib/minecraft/logs
+      - universe:/var/lib/minecraft/universe
+
+  minecraft:
+    image: *minecraft
     container_name: minecraft
     environment:
       MINECRAFT_SERVER_ID: nausicaea
@@ -13,15 +29,15 @@ services:
       JAVA_MAX_MEM: ${JAVA_MAX_MEM}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel_collector:4317
     volumes:
-      - ./minecraft/log4j2.xml:/var/lib/minecraft/log4j2.xml:ro
-      - ./minecraft/opentelemetry.properties:/var/lib/minecraft/opentelemetry.properties:ro
-      - ./minecraft/server.properties:/var/lib/minecraft/server.properties
-      - ./minecraft/ops.json:/var/lib/minecraft/ops.json
-      - ./minecraft/whitelist.json:/var/lib/minecraft/whitelist.json
-      - ./minecraft/banned-ips.json:/var/lib/minecraft/banned-ips.json
-      - ./minecraft/banned-players.json:/var/lib/minecraft/banned-players.json
-      - ./minecraft/config:/var/lib/minecraft/config
-      - ./minecraft/mods:/var/lib/minecraft/mods
+      - ./mounts/log4j2.xml:/var/lib/minecraft/log4j2.xml:ro
+      - ./mounts/opentelemetry.properties:/var/lib/minecraft/opentelemetry.properties:ro
+      - ./mounts/server.properties:/var/lib/minecraft/server.properties
+      - ./mounts/ops.json:/var/lib/minecraft/ops.json
+      - ./mounts/whitelist.json:/var/lib/minecraft/whitelist.json
+      - ./mounts/banned-ips.json:/var/lib/minecraft/banned-ips.json
+      - ./mounts/banned-players.json:/var/lib/minecraft/banned-players.json
+      - ./mounts/config:/var/lib/minecraft/config
+      - ./mounts/mods:/var/lib/minecraft/mods
       - audioplayer_uploads:/var/lib/minecraft/audioplayer_uploads
       - backups:/var/lib/minecraft/backups
       - cache:/var/lib/minecraft/.cache
@@ -30,6 +46,8 @@ services:
     ports:
       - 25565:25565/tcp
       - 24454:24454/udp
+    depends_on:
+      - minecraft_setup
     restart: always
     mem_limit: ${MINECRAFT_MEM_LIMIT}
 
