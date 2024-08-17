@@ -10,7 +10,7 @@ services:
     environment:
       MINECRAFT_SERVER_ID: nausicaea
       JAVA_INITIAL_MEM: 256M
-      JAVA_MAX_MEM: 4G
+      JAVA_MAX_MEM: ${JAVA_MAX_MEM}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel_collector:4317
     volumes:
       - ./minecraft/log4j2.xml:/var/lib/minecraft/log4j2.xml:ro
@@ -31,7 +31,7 @@ services:
       - 25565:25565/tcp
       - 24454:24454/udp
     restart: always
-    mem_limit: 5G
+    mem_limit: ${MINECRAFT_MEM_LIMIT}
 
   otel_collector:
     image: docker.io/otel/opentelemetry-collector:latest
@@ -40,6 +40,7 @@ services:
       - --config=/etc/otel-collector.yaml
     volumes:
       - ./otel/otel-collector.yaml:/etc/otel-collector.yaml:ro
+    restart: always
 
   tempo_setup:
     image: &tempo docker.io/grafana/tempo:latest
@@ -63,6 +64,7 @@ services:
       - tempo:/var/tempo
     depends_on:
       - tempo_setup
+    restart: always
 
   loki_setup:
     image: &loki docker.io/grafana/loki:3.1.1
@@ -86,6 +88,7 @@ services:
       - loki:/var/loki
     depends_on:
       - loki_setup
+    restart: always
 
   prometheus:
     image: docker.io/prom/prometheus:latest
@@ -98,6 +101,7 @@ services:
     volumes:
       - ./prometheus/prometheus.yaml:/etc/prometheus.yaml:ro
       - prometheus:/prometheus
+    restart: always
 
   grafana:
     image: docker.io/grafana/grafana:latest
@@ -114,6 +118,7 @@ services:
       - grafana:/var/lib/grafana
     ports:
       - 3000:3000/tcp
+    restart: always
 
 volumes:
   audioplayer_uploads: {}
