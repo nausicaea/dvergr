@@ -11,7 +11,7 @@ services:
     entrypoint: 
       - chown
       - "-R"
-      - "minecraft:minecraft"
+      - "100:101"
       - /var/lib/minecraft
     volumes:
       - audioplayer_uploads:/var/lib/minecraft/audioplayer_uploads
