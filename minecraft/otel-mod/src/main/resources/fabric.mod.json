@@ -1,0 +1,31 @@
+{
+	"schemaVersion": 1,
+	"id": "otel",
+	"version": "${version}",
+	"name": "OpenTelemetry Log Instrumentation",
+	"description": "This server mod installs the OpenTelemetry Log4j2 Appender, netting you remote logging capabilities",
+	"authors": [
+		"Eleanor Young <developer@nausicaea.net>"
+	],
+	"contact": {
+		"homepage": "https://gitlab.com/nausicaea/otel",
+		"sources": "https://gitlab.com/nausicaea/otel"
+	},
+	"license": "Apache-2.0",
+	"icon": "assets/otel/icon.png",
+	"environment": "server",
+	"entrypoints": {
+		"main": [
+          "net.nausicaea.otel.Otel"
+		],
+		"client": []
+	},
+	"mixins": [
+		"otel.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.10",
+		"minecraft": "~1.20.1",
+		"java": ">=21"
+	}
+}

@@ -10,7 +10,7 @@ processors:
 exporters:
   debug: {}
   otlp/traces:
-    endpoint: tempo:4317
+    endpoint: http://tempo:4317
     tls:
       insecure: true
   prometheusremotewrite:
@@ -25,16 +25,13 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug, otlp/traces]
+      exporters: [otlp/traces]
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug, prometheusremotewrite]
+      exporters: [prometheusremotewrite]
     logs:
       receivers: [otlp]
-      processors: []
+      processors: [batch]
       exporters: [debug, otlphttp/logs]
 
-extensions:
-  zpages:
-    endpoint: 0.0.0.0:55679

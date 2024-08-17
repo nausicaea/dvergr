@@ -1,0 +1,38 @@
+exclude: contrib
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: fix-byte-order-marker
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: check-added-large-files
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-xml
+      - id: check-yaml
+      - id: check-json
+      - id: pretty-format-json
+        exclude: src/main/generated
+        args:
+          - '--autofix'
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0  # or specific git tag
+    hooks:
+      - id: git-check  # Configure in .gitattributes
+      - id: script-must-have-extension
+      - id: script-must-not-have-extension
+      - id: shellcheck
+      - id: shfmt
+        args: ["-w"]
+  - repo: local
+    hooks:
+      - id: detekt
+        name: detekt check
+        description: Runs `detekt` on modified .kt files.
+        language: script
+        entry: .detekt/entrypoint
+        pass_filenames: false
+        require_serial: true
+        files: \.kt$

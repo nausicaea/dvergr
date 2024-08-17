@@ -11,6 +11,7 @@ services:
       MINECRAFT_SERVER_ID: nausicaea
       JAVA_INITIAL_MEM: 256M
       JAVA_MAX_MEM: 4G
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel_collector:4317
     volumes:
       - ./minecraft/log4j2.xml:/var/lib/minecraft/log4j2.xml
       - ./minecraft/server.properties:/var/lib/minecraft/server.properties
