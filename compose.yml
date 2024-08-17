@@ -18,6 +18,7 @@ services:
       - backups:/var/lib/minecraft/backups
       - cache:/var/lib/minecraft/.cache
       - logs:/var/lib/minecraft/logs
+      - crash_reports:/var/lib/minecraft/crash-reports
       - universe:/var/lib/minecraft/universe
 
   minecraft:
@@ -42,6 +43,7 @@ services:
       - backups:/var/lib/minecraft/backups
       - cache:/var/lib/minecraft/.cache
       - logs:/var/lib/minecraft/logs
+      - crash_reports:/var/lib/minecraft/crash-reports
       - universe:/var/lib/minecraft/universe
     ports:
       - 25565:25565/tcp
@@ -143,6 +145,7 @@ volumes:
   backups: {}
   cache: {}
   logs: {}
+  crash_reports: {}
   universe: {}
   tempo: {}
   loki: {}
