@@ -20,10 +20,14 @@ common:
 
 schema_config:
   configs:
-  - from: 2024-08-14
+  - from: 2023-01-05
     store: tsdb
     object_store: filesystem
     schema: v13
     index:
       prefix: index_
       period: 24h
+
+storage_config:
+  filesystem:
+    directory: /var/loki/chunks
