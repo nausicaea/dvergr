@@ -50,7 +50,6 @@ services:
       - 24454:24454/udp
     depends_on:
       - minecraft_setup
-    restart: always
     mem_limit: ${MINECRAFT_MEM_LIMIT}
 
   otel_collector:
@@ -60,7 +59,6 @@ services:
       - --config=/etc/otel-collector.yaml
     volumes:
       - ./otel/otel-collector.yaml:/etc/otel-collector.yaml:ro
-    restart: always
 
   tempo_setup:
     image: &tempo docker.io/grafana/tempo:latest
@@ -84,7 +82,6 @@ services:
       - tempo:/var/tempo
     depends_on:
       - tempo_setup
-    restart: always
 
   loki_setup:
     image: &loki docker.io/grafana/loki:3.1.1
@@ -108,7 +105,6 @@ services:
       - loki:/var/loki
     depends_on:
       - loki_setup
-    restart: always
 
   prometheus:
     image: docker.io/prom/prometheus:latest
@@ -121,7 +117,6 @@ services:
     volumes:
       - ./prometheus/prometheus.yaml:/etc/prometheus.yaml:ro
       - prometheus:/prometheus
-    restart: always
 
   grafana:
     image: docker.io/grafana/grafana:latest
@@ -138,7 +133,6 @@ services:
       - grafana:/var/lib/grafana
     ports:
       - 3000:3000/tcp
-    restart: always
 
 volumes:
   audioplayer_uploads: {}
