@@ -14,7 +14,6 @@ services:
       - "100:101"
       - /var/lib/minecraft
     volumes:
-      - audioplayer_uploads:/var/lib/minecraft/audioplayer_uploads
       - backups:/var/lib/minecraft/backups
       - cache:/var/lib/minecraft/.cache
       - logs:/var/lib/minecraft/logs
@@ -40,7 +39,6 @@ services:
       - ./mounts/config:/var/lib/minecraft/config
       - ./mounts/mods:/var/lib/minecraft/mods
       - ./mounts/datapacks:/var/lib/minecraft/datapacks
-      - audioplayer_uploads:/var/lib/minecraft/audioplayer_uploads
       - backups:/var/lib/minecraft/backups
       - cache:/var/lib/minecraft/.cache
       - logs:/var/lib/minecraft/logs
@@ -137,7 +135,6 @@ services:
       - 3000:3000/tcp
 
 volumes:
-  audioplayer_uploads: {}
   backups: {}
   cache: {}
   logs: {}
