@@ -129,7 +129,8 @@ services:
       GF_FEATURE_TOGGLES_ENABLE: accessControlOnCall,traceqlEditor
       GF_INSTALL_PLUGINS: https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/grafana-lokiexplore-app-latest.zip;grafana-lokiexplore-app
     volumes:
-      - ./grafana:/etc/grafana/provisioning:ro
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana:/var/lib/grafana
     ports:
       - 3000:3000/tcp
