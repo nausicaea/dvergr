@@ -15,7 +15,7 @@ services:
       - /var/lib/minecraft
     volumes:
       - backups:/var/lib/minecraft/backups
-      - cache:/var/lib/minecraft/.cache
+      - cache:/var/lib/minecraft/.fabric
       - logs:/var/lib/minecraft/logs
       - crash_reports:/var/lib/minecraft/crash-reports
       - universe:/var/lib/minecraft/universe
