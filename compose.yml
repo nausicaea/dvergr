@@ -37,8 +37,6 @@ services:
       - ./mounts/banned-ips.json:/var/lib/minecraft/banned-ips.json
       - ./mounts/banned-players.json:/var/lib/minecraft/banned-players.json
       - ./mounts/config:/var/lib/minecraft/config
-      - ./mounts/mods:/var/lib/minecraft/mods
-      - ./mounts/datapacks:/var/lib/minecraft/datapacks
       - backups:/var/lib/minecraft/backups
       - cache:/var/lib/minecraft/.cache
       - logs:/var/lib/minecraft/logs

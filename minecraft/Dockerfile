@@ -29,9 +29,14 @@ RUN set -xe; \
 
 USER minecraft:minecraft
 WORKDIR /var/lib/minecraft
-COPY --chmod=0444 quilt-server-launcher.properties eula.txt ./
-COPY --from=builder --chmod=0444 /src/build/libs/otel-1.0.0.jar ./builtin_mods/
+COPY quilt-server-launcher.properties eula.txt ./
 COPY server.properties ./
-RUN java -jar /usr/local/lib/minecraft/quilt-server-launch.jar --initSettings
+RUN java \
+    -jar /usr/local/lib/minecraft/quilt-server-launch.jar \
+    --universe /var/lib/minecraft/universe \
+    --initSettings
+COPY mods ./mods
+COPY --from=builder /src/build/libs/otel-1.0.0.jar ./mods/
+COPY datapacks ./universe/world/datapacks
 
 ENTRYPOINT ["/bin/docker-entrypoint"]
