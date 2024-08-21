@@ -17,6 +17,7 @@ services:
     build:
       context: minecraft
       args:
+        MODRINTH_PAT: ${MODRINTH_PAT}
         MINECRAFT_VERSION: 1.20.1
     container_name: minecraft_setup
     user: root
