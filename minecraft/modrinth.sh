@@ -1,15 +1,19 @@
 #!/bin/sh
 
-set -ex
+set -e
 
 MODRINTH_BASE_URL=https://staging-api.modrinth.com
 MODRINTH_RATE_LIMIT=300  # per minute (see: https://docs.modrinth.com/#section/Ratelimits)
 USER_AGENT="nausicaea/minecraft/0.1.0 (developer@nausicaea.net)"
 
-eprintln() {
+println() {
     FORMAT="$1\n"
     shift
-    printf "$FORMAT" "$@" >&2
+    printf "$FORMAT" "$@"
+}
+
+eprintln() {
+    println "$@" >&2
 }
 
 # Copied urlencode_grouped_case shamelessly from https://unix.stackexchange.com/a/60698
@@ -76,7 +80,7 @@ get_primary_files() {
 download_files() {
     sh <(
         echo "$1" | 
-            jq -r '.[] | "echo \(.hashes.sha512 | @sh ) \(.filename | @sh) > \(.filename | @sh).sha512; curl --silent -o \(.filename | @sh) \(.url | @sh); sha512sum --status --strict -c \(.filename | @sh).sha512; echo $(pwd)/\(.filename | @sh)"'
+            jq -r '.[] | "echo \(.hashes.sha512 | @sh ) \(.filename | @sh) > \(.filename | @sh).sha512; curl --silent -o \(.filename | @sh) \(.url | @sh); sha512sum --status --strict -c \(.filename | @sh).sha512; echo $(realpath $(pwd)/\(.filename | @sh))"'
     )
 }
 
@@ -102,7 +106,7 @@ download_required_dependencies() {
     echo "$1" | 
         jq -r '.dependencies[] | select(.dependency_type == "required") | [.project_id, .version_id] | @csv' | 
         while IFS=',' read -r -d, project_id version_id; do 
-            eprintf 'processing dependency project:%s version:%s\n' $project_id - $version_id
+            eprintln 'processing dependency project:%s version:%s' $project_id $version_id
             if [ "x$project_id" != "x" ]; then
                 download_mod_project "$project_id"
             elif [ "x$version_id" != "x" ]; then
