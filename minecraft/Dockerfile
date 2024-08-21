@@ -7,7 +7,7 @@ RUN --mount=type=cache,target=/src/.gradle gradle --no-daemon :assemble
 
 FROM docker.io/library/eclipse-temurin:21-jre-alpine@sha256:3f716d52e4045433e94a28d029c93d3c23179822a5d40b1c82b63aedd67c5081
 VOLUME ["/var/lib/minecraft/.fabric", "/var/lib/minecraft/config", "/var/lib/minecraft/logs", "/var/lib/minecraft/crash-reports", "/var/lib/minecraft/mods", "/var/lib/minecraft/universe"]
-EXPOSE 25565/tcp 24454/udp
+EXPOSE 30000/tcp 30001/udp
 ARG MINECRAFT_VERSION=1.21.1
 ENV MINECRAFT_SERVER_ID=minecraft
 ENV JAVA_INITIAL_MEM=256M
