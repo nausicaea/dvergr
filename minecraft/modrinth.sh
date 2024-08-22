@@ -1,7 +1,6 @@
 #!/bin/sh
 
-set -ex
-
+DEBUG=0
 MODRINTH_BASE_URL=https://api.modrinth.com
 MODRINTH_RATE_LIMIT=300  # per minute (see: https://docs.modrinth.com/#section/Ratelimits)
 USER_AGENT="nausicaea/minecraft/0.1.0 (developer@nausicaea.net)"
@@ -9,6 +8,8 @@ ERROR_GENERAL=1
 ERROR_HELP=3
 ERROR_INTERNAL=4
 ERROR_CURL=5
+ERROR_JQ=6
+ERROR_SH=7
 
 println() {
     FORMAT="$1\n"
@@ -18,6 +19,17 @@ println() {
 
 eprintln() {
     println "$@" >&2
+}
+
+debug() {
+    if [ $DEBUG -ne 0 ]; then
+        eprintln '[DEBUG] [%s] %s' "$1" "$2"
+    fi
+}
+
+error() {
+    eprintln '[ERROR] [%s] %s' "$1" "$2"
+    return "$3"
 }
 
 # Copied urlencode_grouped_case shamelessly from https://unix.stackexchange.com/a/60698
@@ -45,135 +57,159 @@ urlencode() {
 }
 
 show_help_and_exit() {
-    eprintln 'show_help_and_exit: todo'
-    exit $ERROR_HELP
-}
-
-download_datapack() {
-    eprintln 'download_datapack: todo'
-    exit $ERROR_GENERAL
+    eprintln '\n\
+Usage:  modrinth [OPTIONS] COMMAND [ID_OR_SLUG ...]\n\
+\n\
+Provides read-only access to Minecraft mods, datapacks, and plugins via Modrinth\n\
+\n\
+Commands:\n\
+  help          Print this message and exit\n\
+  download      Download project artifacts and dependencies\n\
+\n\
+Arguments:\n\
+  ID_OR_SLUG    The ID or slug (short name) of a Modrinth project
+Global Options:\n\
+  -h            Print this message and exit\n\
+  -t            Specify the Modrinth authentication token (default from environment variable "MODRINTH_PAT")\n\
+  -V            Specify the Minecraft version (default from environment variable "MINECRAFT_VERSION")\n\
+  -D            Specify the destination for downloaded artifacts (default is the current working directory)\n\
+\n\
+'
+    return $ERROR_HELP
 }
 
 get_project_versions() {
+    debug "$FUNCNAME" "(project_id: $1)"
+    project=$(urlencode "$1") || return $(error "$FUNCNAME" 'urlencode' "$?")
     curl \
         --silent \
         --header "Authorization: $MODRINTH_PAT" \
         --header "User-Agent: $USER_AGENT" \
-        "$MODRINTH_BASE_URL/v2/project/$1/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%22$MINECRAFT_VERSION%22%5D"
-
-    if [ $? -ne 0 ]; then
-        eprintln 'get_project_versions: curl error: %s' "$?"
-        exit ERROR_CURL
-    fi
+        "$MODRINTH_BASE_URL/v2/project/$project/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%22$MINECRAFT_VERSION%22%5D"
 }
 
 get_version() {
+    debug "$FUNCNAME" "(project_id: $1, version_id: $2)"
     curl \
         --silent \
         --header "Authorization: $MODRINTH_PAT" \
         --header "User-Agent: $USER_AGENT" \
-        "$MODRINTH_BASE_URL/v2/version/$1"
-
-    if [ $? -ne 0 ]; then
-        eprintln 'get_version: curl error: %s' "$?"
-        exit ERROR_CURL
-    fi
+        "$MODRINTH_BASE_URL/v2/project/$1/version/$2"
 }
 
 get_most_recent_version() {
-    jq_semver_cmp='def opt(f): . as $in | try f catch $in; def semver_cmp: sub("\\+.*$"; "") | capture("^(?<v>[^-]+)(?:-(?<p>.*))?$") | [.v, .p // empty] | map(split(".") | map(opt(tonumber))) | .[1] |= (. // {});'
+    debug "$FUNCNAME" '(...)'
     echo "$1" | 
-        jq -c "$jq_semver_cmp"'map(select(.loaders[] == "fabric")) | max_by(.version_number | semver_cmp)'
+        jq -c 'map(select(.loaders[] == "fabric")) | max_by(.date_published | split(".")[0] | strptime("%Y-%m-%dT%H:%M:%S") | mktime)'
 }
 
 get_primary_files() {
+    debug "$FUNCNAME" '(...)'
     echo "$1" | 
         jq -c '.files | map(select(.primary))'
 }
 
 get_required_dependencies() {
-    eprintln 'FIXME: Something is wrong here'
-    echo "$1" | jq -r '.dependencies[] | select(.dependency_type == "required") | [.project_id, .version_id] | @csv'
+    debug "$FUNCNAME" '(...)'
+    echo "$1" | 
+        jq -r '.dependencies | map(select(.dependency_type == "required") | "\(.project_id),\(.version_id)") | .[]'
 }
 
 download_files() {
-    COMMAND_LINES=$(echo "$1" | jq -r '.[] | "echo \(.hashes.sha512 | @sh ) \(.filename | @sh) > \(.filename | @sh).sha512; curl --silent -o \(.filename | @sh) \(.url | @sh); sha512sum -s -c \(.filename | @sh).sha512; echo $(realpath ./\(.filename | @sh))"')
+    debug "$FUNCNAME" '(...)'
+    COMMAND_LINES=$(
+        echo "$1" | 
+            jq -r '.[] | "echo \(.hashes.sha512 | @sh ) \(.filename | @sh) > \(.filename | @sh).sha512; curl --silent -o \(.filename | @sh) \(.url | @sh); sha512sum -s -c \(.filename | @sh).sha512; echo $(realpath ./\(.filename | @sh))"'
+    ) || return $(error "$FUNCNAME" 'jq' "$?")
+
     sh -c "$COMMAND_LINES"
 }
 
 download_version() {
-    PRIMARY_FILES=$(get_primary_files "$1")
-    download_files "$PRIMARY_FILES"
-    DEPENDENCIES=$(get_required_dependencies "$1")
-    download_required_dependencies "$DEPENDENCIES"
-}
-
-download_project() {
-    VERSIONS=$(get_project_versions "$1")
-    MOST_RECENT_VERSION=$(get_most_recent_version "$VERSIONS")
-    if [ "x$MOST_RECENT_VERSION" = "x" ] || [ "$MOST_RECENT_VERSION" = "null" ]; then
-        eprintln 'project %s has no matching versions' "$1"
-        exit $ERROR_GENERAL;
+    VERSION_NAME="$(echo "$1" | jq -r '.name')"
+    debug "$FUNCNAME" "downloading artefacts for '$VERSION_NAME'"
+    PRIMARY_FILES=$(get_primary_files "$1") || return $(error "$FUNCNAME" 'get_primary_files' "$?")
+    download_files "$PRIMARY_FILES" || return $(error "$FUNCNAME" 'download_files' "$?")
+    DEPENDENCIES=$(get_required_dependencies "$1") || return $(error "$FUNCNAME" 'get_required_dependencies' "$?")
+    if [ "x$DEPENDENCIES" != "x" ]; then
+        debug "$FUNCNAME" "processing dependencies for '$VERSION_NAME'"
+        process_dependencies "$DEPENDENCIES" || return $(error "$FUNCNAME" 'process_dependencies' "$?")
     fi
-    download_version "$MOST_RECENT_VERSION"
 }
 
-# Dependency example
-# {"game_versions":["1.21"],"loaders":["fabric"],"id":"qAKuAKD7","project_id":"HXF82T3G","author_id":"oB0UcvPI","featured":false,"name":"21.0.0.18 for Fabric 1.21","version_number":"21.0.0.18","changelog":"```\nAdd Missing translation and update (french) (#2258)\n","changelog_url":null,"date_published":"2024-08-19T22:38:23.294690Z","downloads":1052,"version_type":"beta","status":"listed","requested_status":null,"files":[{"hashes":{"sha1":"e9e7d6643f313e7a5919c8070d708b5bcc03fa61","sha512":"d4f4139ff3daab8409478db9145cf8861f36e70f17f00a85219e7bb1512c7c804d73658477cb3d17e598de2dde52012ece0a648dcad0a3035ce667ea4a4fb0ef"},"url":"https://cdn.modrinth.com/data/HXF82T3G/versions/qAKuAKD7/BiomesOPlenty-fabric-1.21-21.0.0.18.jar","filename":"BiomesOPlenty-fabric-1.21-21.0.0.18.jar","primary":true,"size":22335894,"file_type":null}],"dependencies":[{"version_id":null,"project_id":"P7dR8mSH","file_name":null,"dependency_type":"required"},{"version_id":null,"project_id":"kkmrDlKT","file_name":null,"dependency_type":"required"},{"version_id":null,"project_id":"s3dmwKy5","file_name":null,"dependency_type":"required"}]}
-download_required_dependencies() {
-    echo "$1" | 
-        while IFS=',' read -r -d, project_id version_id; do 
-            eprintln 'processing dependency project:%s version:%s' $project_id $version_id
-            if [ "x$project_id" != "x" ]; then
-                download_project "$project_id"
-            elif [ "x$version_id" != "x" ]; then
-                download_version "$version_id"
+process_version() {
+    debug "$FUNCNAME" "processing project ID '$1' and version ID '$2'"
+
+    VERSION=$(get_version "$1" "$2") || return $(error "$FUNCNAME" 'project_id cut' "$?")
+    download_version "$VERSION" || return $(error "$FUNCNAME" 'download_version' "$?")
+}
+
+process_dependencies() {
+    for dependency in "$1"; do
+        project_id=$(echo $dependency | cut -f1 -d',') || return $(error "$FUNCNAME" 'project_id cut' "$?")
+        version_id=$(echo $dependency | cut -f2 -d',') || return $(error "$FUNCNAME" 'version_id cut' "$?")
+        if [ "x$project_id" != "x" ] && [ $project_id != "null" ]; then
+            if [ "x$version_id" != "x" ] && [ $version_id != "null" ]; then
+                process_version "$project_id" "$version_id" || return $(error "$FUNCNAME" 'process_version' "$?")
+            else
+                process_project "$project_id" || return $(error "$FUNCNAME" 'process_project' "$?")
             fi
-        done
+        fi
+    done
 }
 
-subcommand_datapack() {
-    download_datapack
+process_project() {
+    debug "$FUNCNAME" "processing project ID '$1'"
+
+    VERSIONS=$(get_project_versions "$1") || return $(error "$FUNCNAME" 'get_project_versions'"$?")
+    MOST_RECENT_VERSION=$(get_most_recent_version "$VERSIONS") || return $(error "$FUNCNAME" 'get_most_recent_version' "$?")
+    if [ "x$MOST_RECENT_VERSION" = "x" ] || [ "$MOST_RECENT_VERSION" = "null" ]; then
+        return $(error "$FUNCNAME" "no matching versions for project ID '$1'" "$ERROR_GENERAL")
+    fi
+
+    download_version "$MOST_RECENT_VERSION" || return $(error "$FUNCNAME" 'download_version' "$?")
 }
 
-subcommand_mod() {
-    cd $(mktemp -d)
+subcommand_download() {
+    CWD=$(pwd) || return $(error "$FUNCNAME" 'pwd' "$?")
+    cd $(mktemp -d) || return $(error "$FUNCNAME" 'mktemp' "$?")
 
-    for raw_query in "$@"; do
-        eprintln 'processing mod "%s"' "$raw_query"
-
-        # Url-encode the search string
-        PROJECT_SLUG_OR_ID=$(urlencode "$raw_query")
-
+    for project in "$@"; do
         # Download all files related to the project and the specified minecraft version
-        FILES=$(download_project "$PROJECT_SLUG_OR_ID")
+        ARTEFACTS=$(process_project "$project") || return $(error "$FUNCNAME" 'process_project' "$?")
 
         # Copy the resultant files to the destination directory
         if [ "x$DESTINATION" != "x" ]; then
-            install -m 0644 -D -t "$DESTINATION" "$FILES"
+            for artefact in $ARTEFACTS; do
+                install -v -m 0600 -D -t "$DESTINATION" "$artefact" || return $(error "$FUNCNAME" 'install' "$?")
+            done
+        else
+            for artefact in $ARTEFACTS; do
+                install -v -m 0600 -D -t "$CWD" "$artefact" || return $(error "$FUNCNAME" 'install' "$?")
+            done
         fi
     done
 
-    cd -
+    cd $CWD
 }
 
 main() {
     if [ $# -eq 0 ]; then
-        show_help_and_exit
+        show_help_and_exit || return
     fi
 
-    ARGS=$(getopt 'ht:V:D:' $*)
-
-    if [ $? -ne 0 ]; then
-        show_help_and_exit
-    fi
+    ARGS=$(getopt 'vht:V:D:' $*) || show_help_and_exit || return
 
     set -- $ARGS
 
     while :; do
         case "$1" in
+            -v)
+                DEBUG=1
+                shift
+                ;;
             -h) 
-                show_help_and_exit
+                show_help_and_exit || return
                 ;;
             -V)
                 MINECRAFT_VERSION="$2"
@@ -200,17 +236,14 @@ main() {
     # Parse the subcommand
     case "$1" in
         help)
-            show_help_and_exit
+            show_help_and_exit || return
             ;;
-        datapack)
-            SUBCOMMAND="datapack"
-            ;;
-        mod)
-            SUBCOMMAND="mod"
+        download)
+            SUBCOMMAND="download"
             ;;
         *) 
             eprintln 'invalid subcommand "%s"' "$1"
-            show_help_and_exit
+            show_help_and_exit || return
             ;;
     esac
 
@@ -219,13 +252,13 @@ main() {
     # Ensure that the Modrinth API token is set
     if [ "x$MODRINTH_PAT" = "x" ]; then
         eprintln 'missing Modrinth personal authentication token (variable "MODRINTH_PAT")'
-        exit $ERROR_GENERAL
+        show_help_and_exit || return
     fi
 
     # Ensure that the Minecraft version is set
     if [ "x$MINECRAFT_VERSION" = "x" ]; then
         eprintln 'missing Minecraft version (variable "MINECRAFT_VERSION")'
-        exit $ERROR_GENERAL
+        show_help_and_exit || return
     fi
 
     # Ensure that the destination is real path
@@ -233,20 +266,17 @@ main() {
         DESTINATION=$(realpath "$RAW_DESTINATION")
         if [ $? -ne 0 ]; then
             eprintln 'no such file or directory "%s"' "$RAW_DESTINATION"
-            show_help_and_exit
+            show_help_and_exit || return
         fi
     fi
 
     case $SUBCOMMAND in
-        datapack) 
-            subcommand_datapack
-            ;;
-        mod)
-            subcommand_mod "$@"
+        download)
+            subcommand_download "$@" || return $(error "$FUNCNAME" 'subcommand_download' "$?")
             ;;
         *)
             eprintln 'internal error: unknown subcommand "%s"' "$SUBCOMMAND"
-            exit $ERROR_INTERNAL
+            return $ERROR_INTERNAL
             ;;
     esac
 }

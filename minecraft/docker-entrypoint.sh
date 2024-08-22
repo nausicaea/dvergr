@@ -34,7 +34,7 @@ JAVA_OPTS=" \
 
 exec java \
     ${JAVA_OPTS} \
-    -jar /usr/local/lib/minecraft/fabric-launcher.jar \
+    -jar /usr/local/lib/fabric-launcher.jar \
     --serverId ${MINECRAFT_SERVER_ID} \
     --universe /var/lib/minecraft/universe \
     --nogui
