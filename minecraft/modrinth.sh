@@ -70,6 +70,7 @@ Arguments:
   ID_OR_SLUG    The ID or slug (short name) of a Modrinth project
 Global Options:
   -h            Print this message and exit
+  -v            Enable debugging output
   -t            Specify the Modrinth authentication token (default from environment variable "MODRINTH_PAT")
   -V            Specify the Minecraft version (default from environment variable "MINECRAFT_VERSION")
   -D            Specify the destination for downloaded artifacts (default is the current working directory)
