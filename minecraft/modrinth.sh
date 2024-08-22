@@ -57,23 +57,23 @@ urlencode() {
 }
 
 show_help_and_exit() {
-    eprintln '\n\
-Usage:  modrinth [OPTIONS] COMMAND [ID_OR_SLUG ...]\n\
-\n\
-Provides read-only access to Minecraft mods, datapacks, and plugins via Modrinth\n\
-\n\
-Commands:\n\
-  help          Print this message and exit\n\
-  download      Download project artifacts and dependencies\n\
-\n\
-Arguments:\n\
+    eprintln '
+Usage:  modrinth [OPTIONS] COMMAND [ID_OR_SLUG ...]
+
+Provides read-only access to Minecraft mods, datapacks, and plugins via Modrinth
+
+Commands:
+  help          Print this message and exit
+  download      Download project artifacts and dependencies
+
+Arguments:
   ID_OR_SLUG    The ID or slug (short name) of a Modrinth project
-Global Options:\n\
-  -h            Print this message and exit\n\
-  -t            Specify the Modrinth authentication token (default from environment variable "MODRINTH_PAT")\n\
-  -V            Specify the Minecraft version (default from environment variable "MINECRAFT_VERSION")\n\
-  -D            Specify the destination for downloaded artifacts (default is the current working directory)\n\
-\n\
+Global Options:
+  -h            Print this message and exit
+  -t            Specify the Modrinth authentication token (default from environment variable "MODRINTH_PAT")
+  -V            Specify the Minecraft version (default from environment variable "MINECRAFT_VERSION")
+  -D            Specify the destination for downloaded artifacts (default is the current working directory)
+
 '
     return $ERROR_HELP
 }
