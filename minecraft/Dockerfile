@@ -1,6 +1,9 @@
 # syntax=docker/dockerfile:1
 
 FROM docker.io/library/gradle:8.10-jdk21-alpine AS builder
+ARG MINECRAFT_VERSION
+ARG YARN_MAPPINGS_VERSION
+ARG FABRIC_LOADER_VERSION
 WORKDIR /src
 COPY otel-mod /src
 RUN --mount=type=cache,target=/src/.gradle gradle --no-daemon :assemble
@@ -8,9 +11,14 @@ RUN --mount=type=cache,target=/src/.gradle gradle --no-daemon :assemble
 FROM docker.io/library/alpine:latest AS downloader
 ARG MODRINTH_PAT
 ARG MINECRAFT_VERSION
+ARG FABRIC_LOADER_VERSION
+ARG FABRIC_LOADER_CHECKSUM
+ARG FABRIC_INSTALLER_VERSION
+ARG OTEL_JAVAAGENT_VERSION
+ARG OTEL_JAVAAGENT_CHECKSUM
 RUN apk add curl jq
-ADD --link --checksum=sha256:d5093ba83742ef496479db82cb384f70a7e84ab7029936d50f5622f651038c49 https://meta.fabricmc.net/v2/versions/loader/${MINECRAFT_VERSION}/0.16.2/1.0.1/server/jar /artefacts/lib/fabric-launcher.jar
-ADD --link --checksum=sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.33.5/opentelemetry-javaagent.jar /artefacts/lib/opentelemetry-javaagent.jar
+ADD --link --checksum=${FABRIC_LOADER_CHECKSUM} https://meta.fabricmc.net/v2/versions/loader/${MINECRAFT_VERSION}/${FABRIC_LOADER_VERSION}/${FABRIC_INSTALLER_VERSION}/server/jar /artefacts/lib/fabric-launcher.jar
+ADD --link --checksum=${OTEL_JAVAAGENT_CHECKSUM} https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar /artefacts/lib/opentelemetry-javaagent.jar
 COPY --chmod=0755 modrinth.sh /bin/modrinth
 #ENV MODRINTH_PAT=${MODRINTH_PAT}
 #ENV MINECRAFT_VERSION=${MINECRAFT_VERSION}

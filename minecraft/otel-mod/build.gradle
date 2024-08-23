@@ -30,11 +30,18 @@ loom {
 
 }
 
+def minecraft_version = System.env.MINECRAFT_VERSION
+assert minecraft_version != null : "You must specify the environment variable 'MINECRAFT_VERSION'"
+def yarn_mappings_version = System.env.YARN_MAPPINGS_VERSION
+assert yarn_mappings_version != null : "You must specify the environment variable 'YARN_MAPPINGS_VERSION'"
+def fabric_loader_version = System.env.FABRIC_LOADER_VERSION
+assert fabric_loader_version != null : "You must specify the environment variable 'FABRIC_LOADER_VERSION'"
+
 dependencies {
 	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	minecraft "com.mojang:minecraft:${minecraft_version}"
+	mappings "net.fabricmc:yarn:${yarn_mappings_version}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
 
 	implementation 'io.opentelemetry.instrumentation:opentelemetry-log4j-appender-2.17:2.6.0-alpha'
     implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.7.0'
