@@ -3,6 +3,7 @@
 DEBUG=0
 MODRINTH_BASE_URL=https://api.modrinth.com
 MODRINTH_RATE_LIMIT=300  # per minute (see: https://docs.modrinth.com/#section/Ratelimits)
+MODRINTH_DEFAULT_LOADER=fabric
 USER_AGENT="nausicaea/minecraft/0.1.0 (developer@nausicaea.net)"
 ERROR_GENERAL=1
 ERROR_HELP=3
@@ -71,37 +72,42 @@ Arguments:
 Global Options:
   -h            Print this message and exit
   -v            Enable debugging output
+  -l            Specify the required loader (default "%s"; ex. fabric, datapack, etc.)
   -t            Specify the Modrinth authentication token (default from environment variable "MODRINTH_PAT")
   -V            Specify the Minecraft version (default from environment variable "MINECRAFT_VERSION")
   -D            Specify the destination for downloaded artifacts (default is the current working directory)
 
-'
+' "$MODRINTH_DEFAULT_LOADER"
     return $ERROR_HELP
 }
 
 get_project_versions() {
     debug "$FUNCNAME" "(project_id: $1)"
     project=$(urlencode "$1") || return $(error "$FUNCNAME" 'urlencode' "$?")
+    url="$MODRINTH_BASE_URL/v2/project/$project/version?loaders=%5B%22$MODRINTH_LOADER%22%5D&game_versions=%5B%22$MINECRAFT_VERSION%22%5D"
+    debug "$FUNCNAME" "curl $url"
     curl \
         --silent \
         --header "Authorization: $MODRINTH_PAT" \
         --header "User-Agent: $USER_AGENT" \
-        "$MODRINTH_BASE_URL/v2/project/$project/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%22$MINECRAFT_VERSION%22%5D"
+        "$url"
 }
 
 get_version() {
     debug "$FUNCNAME" "(project_id: $1, version_id: $2)"
+    url="$MODRINTH_BASE_URL/v2/project/$1/version/$2"
+    debug "$FUNCNAME" "curl $url"
     curl \
         --silent \
         --header "Authorization: $MODRINTH_PAT" \
         --header "User-Agent: $USER_AGENT" \
-        "$MODRINTH_BASE_URL/v2/project/$1/version/$2"
+        "$url"
 }
 
 get_most_recent_version() {
     debug "$FUNCNAME" '(...)'
     echo "$1" | 
-        jq -c 'map(select(.loaders[] == "fabric")) | max_by(.date_published | split(".")[0] | strptime("%Y-%m-%dT%H:%M:%S") | mktime)'
+        jq -c "map(select(.loaders[] == \"$MODRINTH_LOADER\")) | max_by(.date_published | split(\".\")[0] | strptime(\"%Y-%m-%dT%H:%M:%S\") | mktime)"
 }
 
 get_primary_files() {
@@ -199,7 +205,7 @@ main() {
         show_help_and_exit || return
     fi
 
-    ARGS=$(getopt 'vht:V:D:' $*) || show_help_and_exit || return
+    ARGS=$(getopt 'vhl:t:V:D:' $*) || show_help_and_exit || return
 
     set -- $ARGS
 
@@ -224,6 +230,11 @@ main() {
                 ;;
             -t)
                 MODRINTH_PAT="$2"
+                shift
+                shift
+                ;;
+            -l)
+                MODRINTH_LOADER="$2"
                 shift
                 shift
                 ;;
@@ -269,6 +280,11 @@ main() {
             eprintln 'no such file or directory "%s"' "$RAW_DESTINATION"
             show_help_and_exit || return
         fi
+    fi
+
+    # If the loader is not set, use the default
+    if [ "x$MODRINTH_LOADER" = "x" ]; then
+        MODRINTH_LOADER="$MODRINTH_DEFAULT_LOADER"
     fi
 
     case $SUBCOMMAND in

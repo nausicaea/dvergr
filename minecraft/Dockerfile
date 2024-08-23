@@ -23,7 +23,7 @@ COPY --chmod=0755 modrinth.sh /bin/modrinth
 #ENV MODRINTH_PAT=${MODRINTH_PAT}
 #ENV MINECRAFT_VERSION=${MINECRAFT_VERSION}
 #ENTRYPOINT ["/bin/sh"]
-RUN /bin/modrinth -D /artefacts/mods download \
+RUN /bin/modrinth -D /artefacts/mods -l fabric download \
     advanced-backups \
     afk-announcer \
     coord-finder \
@@ -39,6 +39,9 @@ RUN /bin/modrinth -D /artefacts/mods download \
     starlight \
     vanilla-refresh \
     simple-voice-chat
+RUN /bin/modrinth -D /artefacts/datapacks -l datapack download \
+    new-in-town \
+    new-in-town-dimensions
 
 FROM docker.io/library/eclipse-temurin:21-jre-alpine@sha256:3f716d52e4045433e94a28d029c93d3c23179822a5d40b1c82b63aedd67c5081
 VOLUME ["/var/lib/minecraft/.fabric", "/var/lib/minecraft/config", "/var/lib/minecraft/logs", "/var/lib/minecraft/crash-reports", "/var/lib/minecraft/mods", "/var/lib/minecraft/universe"]
@@ -61,8 +64,8 @@ RUN java \
     --universe /var/lib/minecraft/universe \
     --initSettings
 COPY eula.txt ./
-COPY --from=downloader --chmod=0644 /artefacts/mods/*.jar ./mods/
 COPY --from=builder --chmod=0644 /src/build/libs/otel-0.0.0.jar ./mods/
-COPY datapacks ./universe/world/datapacks
+COPY --from=downloader --chmod=0644 /artefacts/mods/*.jar ./mods/
+COPY --from=downloader --chmod=0644 /artefacts/datapacks/*.zip ./universe/world/datapacks/
 
 ENTRYPOINT ["/bin/docker-entrypoint"]
