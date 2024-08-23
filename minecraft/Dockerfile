@@ -62,7 +62,7 @@ RUN java \
     --initSettings
 COPY eula.txt ./
 COPY --from=downloader --chmod=0644 /artefacts/mods/*.jar ./mods/
-COPY --from=builder --chmod=0644 /src/build/libs/otel-1.0.0.jar ./mods/
+COPY --from=builder --chmod=0644 /src/build/libs/otel-0.0.0.jar ./mods/
 COPY datapacks ./universe/world/datapacks
 
 ENTRYPOINT ["/bin/docker-entrypoint"]

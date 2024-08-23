@@ -43,52 +43,54 @@ dependencies {
 	mappings "net.fabricmc:yarn:${yarn_mappings_version}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
 
-	implementation 'io.opentelemetry.instrumentation:opentelemetry-log4j-appender-2.17:2.6.0-alpha'
-    implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.7.0'
-    implementation 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator:2.7.0-alpha'
-    implementation 'io.opentelemetry:opentelemetry-api:1.41.0'
-    implementation 'io.opentelemetry:opentelemetry-api-incubator:1.41.0-alpha'
-    implementation 'io.opentelemetry:opentelemetry-context:1.41.0'
-	implementation 'io.opentelemetry.semconv:opentelemetry-semconv:1.25.0-alpha'
-    implementation 'io.opentelemetry:opentelemetry-exporter-otlp:1.41.0'
-    implementation 'io.opentelemetry:opentelemetry-exporter-otlp-common:1.41.0'
-    implementation 'io.opentelemetry:opentelemetry-exporter-common:1.41.0'
-    implementation 'io.opentelemetry:opentelemetry-exporter-sender-okhttp:1.41.0'
-    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    implementation 'com.squareup.okio:okio:3.6.0'
-    implementation 'com.squareup.okio:okio-jvm:3.6.0'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.21'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.21'
-    implementation 'org.jetbrains:annotations:13.0'
+	implementation "io.opentelemetry.instrumentation:opentelemetry-log4j-appender-2.17:${project.otel_log4j_appender_version}"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:${project.otel_instrumentation_version}"
+    implementation "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator:${project.otel_instrumentation_version}-alpha"
+    implementation "io.opentelemetry:opentelemetry-api:${project.otel_stack_version}"
+    implementation "io.opentelemetry:opentelemetry-api-incubator:${project.otel_stack_version}-alpha"
+    implementation "io.opentelemetry:opentelemetry-context:${project.otel_stack_version}"
+	implementation "io.opentelemetry.semconv:opentelemetry-semconv:${project.otel_semconv_version}"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp:${project.otel_stack_version}"
+    implementation "io.opentelemetry:opentelemetry-exporter-otlp-common:${project.otel_stack_version}"
+    implementation "io.opentelemetry:opentelemetry-exporter-common:${project.otel_stack_version}"
+    implementation "io.opentelemetry:opentelemetry-exporter-sender-okhttp:${project.otel_stack_version}"
+    implementation "com.squareup.okhttp3:okhttp:${project.okhttp_version}"
+    implementation "com.squareup.okio:okio:${project.okio_version}"
+    implementation "com.squareup.okio:okio-jvm:${project.okio_version}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-common:${project.kotlin_stdlib_common_version}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${project.kotlin_stdlib_stack_version}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${project.kotlin_stdlib_stack_version}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:${project.kotlin_stdlib_stack_version}"
+    implementation "org.jetbrains:annotations:${project.jetbrains_annotations_version}"
 
-	include 'io.opentelemetry.instrumentation:opentelemetry-log4j-appender-2.17:2.6.0-alpha'
-    include 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:2.7.0'
-    include 'io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator:2.7.0-alpha'
-    include 'io.opentelemetry:opentelemetry-api:1.41.0'
-    include 'io.opentelemetry:opentelemetry-api-incubator:1.41.0-alpha'
-    include 'io.opentelemetry:opentelemetry-context:1.41.0'
-	include 'io.opentelemetry.semconv:opentelemetry-semconv:1.25.0-alpha'
-    include 'io.opentelemetry:opentelemetry-exporter-otlp:1.41.0'
-    include 'io.opentelemetry:opentelemetry-exporter-otlp-common:1.41.0'
-    include 'io.opentelemetry:opentelemetry-exporter-common:1.41.0'
-    include 'io.opentelemetry:opentelemetry-exporter-sender-okhttp:1.41.0'
-    include 'com.squareup.okhttp3:okhttp:4.12.0'
-    include 'com.squareup.okio:okio:3.6.0'
-    include 'com.squareup.okio:okio-jvm:3.6.0'
-    include 'org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10'
-    include 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21'
-    include 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.21'
-    include 'org.jetbrains.kotlin:kotlin-stdlib:1.8.21'
-    include 'org.jetbrains:annotations:13.0'
+	include "io.opentelemetry.instrumentation:opentelemetry-log4j-appender-2.17:${project.otel_log4j_appender_version}"
+    include "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api:${project.otel_instrumentation_version}"
+    include "io.opentelemetry.instrumentation:opentelemetry-instrumentation-api-incubator:${project.otel_instrumentation_version}-alpha"
+    include "io.opentelemetry:opentelemetry-api:${project.otel_stack_version}"
+    include "io.opentelemetry:opentelemetry-api-incubator:${project.otel_stack_version}-alpha"
+    include "io.opentelemetry:opentelemetry-context:${project.otel_stack_version}"
+	include "io.opentelemetry.semconv:opentelemetry-semconv:${project.otel_semconv_version}"
+    include "io.opentelemetry:opentelemetry-exporter-otlp:${project.otel_stack_version}"
+    include "io.opentelemetry:opentelemetry-exporter-otlp-common:${project.otel_stack_version}"
+    include "io.opentelemetry:opentelemetry-exporter-common:${project.otel_stack_version}"
+    include "io.opentelemetry:opentelemetry-exporter-sender-okhttp:${project.otel_stack_version}"
+    include "com.squareup.okhttp3:okhttp:${project.okhttp_version}"
+    include "com.squareup.okio:okio:${project.okio_version}"
+    include "com.squareup.okio:okio-jvm:${project.okio_version}"
+    include "org.jetbrains.kotlin:kotlin-stdlib-common:${project.kotlin_stdlib_common_version}"
+    include "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${project.kotlin_stdlib_stack_version}"
+    include "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${project.kotlin_stdlib_stack_version}"
+    include "org.jetbrains.kotlin:kotlin-stdlib:${project.kotlin_stdlib_stack_version}"
+    include "org.jetbrains:annotations:${project.jetbrains_annotations_version}"
 }
 
 processResources {
 	inputs.property "version", project.version
+    inputs.property "minecraft_version", minecraft_version
+    inputs.property "fabric_loader_version", fabric_loader_version
 
 	filesMatching("fabric.mod.json") {
-		expand "version": project.version
+		expand "version": project.version, "minecraft_version": minecraft_version, "fabric_loader_version": fabric_loader_version
 	}
 }
 
