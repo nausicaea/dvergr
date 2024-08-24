@@ -48,10 +48,10 @@
 	   can be used to slow down propagation speed of decay in the worlds
 	   decay does use very few resources, but if your fear of someone letting decay
 	   spread free or using higher random tick rates than vanilla you can limit the spreading rate here
-	   
+
 	   Fading and Failing do no real harm to the world. If you turn up these values too high players
 	   may lack the feedback they need that what they are doing is correct
-	   
+
 	   1.0: Every random tick (default)
 	   0.5: Every second random tick
 	   0.0: Never (forbidden - players would be unable to progress)

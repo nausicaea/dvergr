@@ -35,17 +35,20 @@ error() {
 
 # Copied urlencode_grouped_case shamelessly from https://unix.stackexchange.com/a/60698
 urlencode() {
-    string=$1; format=; set --
+    string=$1
+    format=
+    set --
     while
         literal=${string%%[!-._~0-9A-Za-z]*}
         case "$literal" in
-            ?*)
-                format=$format%s
-                set -- "$@" "$literal"
-                string=${string#$literal};;
+        ?*)
+            format=$format%s
+            set -- "$@" "$literal"
+            string=${string#$literal}
+            ;;
         esac
         case "$string" in
-            "") false;;
+        "") false ;;
         esac
     do
         tail=${string#?}
@@ -106,26 +109,26 @@ get_version() {
 
 get_most_recent_version() {
     debug "$FUNCNAME" '(...)'
-    echo "$1" | 
+    echo "$1" |
         jq -c "map(select(.loaders[] == \"$MODRINTH_LOADER\")) | max_by(.date_published | split(\".\")[0] | strptime(\"%Y-%m-%dT%H:%M:%S\") | mktime)"
 }
 
 get_primary_files() {
     debug "$FUNCNAME" '(...)'
-    echo "$1" | 
+    echo "$1" |
         jq -c '.files | map(select(.primary))'
 }
 
 get_required_dependencies() {
     debug "$FUNCNAME" '(...)'
-    echo "$1" | 
+    echo "$1" |
         jq -r '.dependencies | map(select(.dependency_type == "required") | "\(.project_id),\(.version_id)") | .[]'
 }
 
 download_files() {
     debug "$FUNCNAME" '(...)'
     COMMAND_LINES=$(
-        echo "$1" | 
+        echo "$1" |
             jq -r '.[] | "echo \(.hashes.sha512 | @sh ) \(.filename | @sh) > \(.filename | @sh).sha512; curl --silent -o \(.filename | @sh) \(.url | @sh); sha512sum -s -c \(.filename | @sh).sha512; echo $(realpath ./\(.filename | @sh))"'
     ) || return $(error "$FUNCNAME" 'jq' "$?")
 
@@ -219,39 +222,44 @@ main() {
     while getopts 'dhl:t:V:O:' opt; do
         eprintln '%s' "$opt"
         case "$opt" in
-            -d)
-                export DEBUG=1
-                eprintln 'debugging active'
-                ;;
-            -h) 
-                show_help_and_exit || return;;
-            -V)
-                export MINECRAFT_VERSION="$OPTARG";;
-            -O)
-                export RAW_DESTINATION="$OPTARG";;
-            -t)
-                export MODRINTH_PAT="$OPTARG";;
-            -l)
-                export MODRINTH_LOADER="$OPTARG";;
+        -d)
+            export DEBUG=1
+            eprintln 'debugging active'
+            ;;
+        -h)
+            show_help_and_exit || return
+            ;;
+        -V)
+            export MINECRAFT_VERSION="$OPTARG"
+            ;;
+        -O)
+            export RAW_DESTINATION="$OPTARG"
+            ;;
+        -t)
+            export MODRINTH_PAT="$OPTARG"
+            ;;
+        -l)
+            export MODRINTH_LOADER="$OPTARG"
+            ;;
         esac
     done
     eprintln '%s' "$(export -p)"
-    shift $(($OPTIND - 1))
+    shift $((OPTIND - 1))
 
     # Parse the subcommand
     local SUBCOMMAND
     case "$1" in
-        help)
-            show_help_and_exit || return
-            ;;
-        download)
-            SUBCOMMAND="download"
-            shift
-            ;;
-        *) 
-            eprintln 'invalid subcommand "%s"' "$1"
-            show_help_and_exit || return
-            ;;
+    help)
+        show_help_and_exit || return
+        ;;
+    download)
+        SUBCOMMAND="download"
+        shift
+        ;;
+    *)
+        eprintln 'invalid subcommand "%s"' "$1"
+        show_help_and_exit || return
+        ;;
     esac
 
     # Ensure that the Modrinth API token is set
@@ -281,13 +289,13 @@ main() {
     fi
 
     case $SUBCOMMAND in
-        download)
-            subcommand_download "$@" || return $(error "$FUNCNAME" 'subcommand_download' "$?")
-            ;;
-        *)
-            eprintln 'internal error: unknown subcommand "%s"' "$SUBCOMMAND"
-            return $ERROR_INTERNAL
-            ;;
+    download)
+        subcommand_download "$@" || return $(error "$FUNCNAME" 'subcommand_download' "$?")
+        ;;
+    *)
+        eprintln 'internal error: unknown subcommand "%s"' "$SUBCOMMAND"
+        return $ERROR_INTERNAL
+        ;;
     esac
 }
 

@@ -26,7 +26,7 @@ services:
         OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
     container_name: minecraft_setup
     user: root
-    entrypoint: 
+    entrypoint:
       - chown
       - "-R"
       - "100:101"
@@ -68,7 +68,7 @@ services:
   otel_collector:
     image: docker.io/otel/opentelemetry-collector:latest
     container_name: otel_collector
-    command: 
+    command:
       - --config=/etc/otel-collector.yaml
     volumes:
       - ./otel/otel-collector.yaml:/etc/otel-collector.yaml:ro
@@ -92,7 +92,7 @@ services:
   tempo:
     image: *tempo
     container_name: tempo
-    command: 
+    command:
       - --config.file=/etc/tempo.yaml
     volumes:
       - ./tempo/tempo.yaml:/etc/tempo.yaml:ro
@@ -115,7 +115,7 @@ services:
   loki:
     image: *loki
     container_name: loki
-    command: 
+    command:
       - --config.file=/etc/loki.yaml
     volumes:
       - ./loki/loki.yaml:/etc/loki.yaml:ro
@@ -126,7 +126,7 @@ services:
   prometheus:
     image: docker.io/prom/prometheus:latest
     container_name: prometheus
-    command: 
+    command:
       - --config.file=/etc/prometheus.yaml
       - --web.enable-remote-write-receiver
       - --enable-feature=exemplar-storage

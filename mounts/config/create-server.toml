@@ -523,4 +523,3 @@
 		#The top speed of any assembled Train.
 		#Range: 0.0 ~ 3.4028234663852886E38
 		trainTopSpeed = 28.0
-
