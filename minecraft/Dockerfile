@@ -23,7 +23,7 @@ COPY --chmod=0755 modrinth.sh /bin/modrinth
 #ENV MODRINTH_PAT=${MODRINTH_PAT}
 #ENV MINECRAFT_VERSION=${MINECRAFT_VERSION}
 #ENTRYPOINT ["/bin/sh"]
-RUN /bin/modrinth -D /artefacts/mods -l fabric download \
+RUN /bin/modrinth -d -O /artefacts/mods -l fabric download \
     advanced-backups \
     afk-announcer \
     coord-finder \
@@ -38,8 +38,9 @@ RUN /bin/modrinth -D /artefacts/mods -l fabric download \
     sleep \
     starlight \
     vanilla-refresh \
-    simple-voice-chat
-RUN /bin/modrinth -D /artefacts/datapacks -l datapack download \
+    simple-voice-chat \
+    biomes-o-plenty
+RUN /bin/modrinth -d -O /artefacts/datapacks -l datapack download \
     new-in-town \
     new-in-town-dimensions
 

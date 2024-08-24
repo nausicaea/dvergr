@@ -1,19 +1,19 @@
 #!/bin/sh
 
-DEBUG=0
-MODRINTH_BASE_URL=https://api.modrinth.com
-MODRINTH_RATE_LIMIT=300  # per minute (see: https://docs.modrinth.com/#section/Ratelimits)
-MODRINTH_DEFAULT_LOADER=fabric
-USER_AGENT="nausicaea/minecraft/0.1.0 (developer@nausicaea.net)"
-ERROR_GENERAL=1
-ERROR_HELP=3
-ERROR_INTERNAL=4
-ERROR_CURL=5
-ERROR_JQ=6
-ERROR_SH=7
+# ASH Manpage: https://linux.die.net/man/1/ash
+
+set -uex
+
+export DEBUG=0
+readonly MODRINTH_BASE_URL=https://staging-api.modrinth.com
+readonly MODRINTH_DEFAULT_LOADER=fabric
+readonly USER_AGENT="nausicaea/minecraft/0.1.0 (developer@nausicaea.net)"
+readonly ERROR_GENERAL=1
+readonly ERROR_HELP=3
+readonly ERROR_INTERNAL=4
 
 println() {
-    FORMAT="$1\n"
+    local FORMAT="$1\n"
     shift
     printf "$FORMAT" "$@"
 }
@@ -71,11 +71,11 @@ Arguments:
   ID_OR_SLUG    The ID or slug (short name) of a Modrinth project
 Global Options:
   -h            Print this message and exit
-  -v            Enable debugging output
+  -d            Enable debugging output
   -l            Specify the required loader (default "%s"; ex. fabric, datapack, etc.)
   -t            Specify the Modrinth authentication token (default from environment variable "MODRINTH_PAT")
   -V            Specify the Minecraft version (default from environment variable "MINECRAFT_VERSION")
-  -D            Specify the destination for downloaded artifacts (default is the current working directory)
+  -O            Specify the destination for downloaded artifacts (default is the current working directory)
 
 ' "$MODRINTH_DEFAULT_LOADER"
     return $ERROR_HELP
@@ -133,12 +133,12 @@ download_files() {
 }
 
 download_version() {
-    VERSION_NAME="$(echo "$1" | jq -r '.name')"
+    VERSION_NAME="$(echo "$1" | jq -r '.name')" || return $(error "$FUNCNAME" 'jq' "$?")
     debug "$FUNCNAME" "downloading artefacts for '$VERSION_NAME'"
     PRIMARY_FILES=$(get_primary_files "$1") || return $(error "$FUNCNAME" 'get_primary_files' "$?")
     download_files "$PRIMARY_FILES" || return $(error "$FUNCNAME" 'download_files' "$?")
     DEPENDENCIES=$(get_required_dependencies "$1") || return $(error "$FUNCNAME" 'get_required_dependencies' "$?")
-    if [ "x$DEPENDENCIES" != "x" ]; then
+    if [ ! -z ${DEPENDENCIES+x} ]; then
         debug "$FUNCNAME" "processing dependencies for '$VERSION_NAME'"
         process_dependencies "$DEPENDENCIES" || return $(error "$FUNCNAME" 'process_dependencies' "$?")
     fi
@@ -152,17 +152,20 @@ process_version() {
 }
 
 process_dependencies() {
-    for dependency in "$1"; do
-        project_id=$(echo $dependency | cut -f1 -d',') || return $(error "$FUNCNAME" 'project_id cut' "$?")
-        version_id=$(echo $dependency | cut -f2 -d',') || return $(error "$FUNCNAME" 'version_id cut' "$?")
-        if [ "x$project_id" != "x" ] && [ $project_id != "null" ]; then
-            if [ "x$version_id" != "x" ] && [ $version_id != "null" ]; then
-                process_version "$project_id" "$version_id" || return $(error "$FUNCNAME" 'process_version' "$?")
-            else
-                process_project "$project_id" || return $(error "$FUNCNAME" 'process_project' "$?")
+    debug "$FUNCNAME" "(dependencies: $1)"
+    echo "$1" |
+        while read -r dependency; do
+            debug "$FUNCNAME" "processing dependency '$dependency'"
+            project_id=$(echo $dependency | cut -f1 -d',') || return $(error "$FUNCNAME" 'project_id cut' "$?")
+            version_id=$(echo $dependency | cut -f2 -d',') || return $(error "$FUNCNAME" 'version_id cut' "$?")
+            if [ ! -z ${project_id+x} ] && [ $project_id != "null" ]; then
+                if [ ! -z ${version_id+x} ] && [ $version_id != "null" ]; then
+                    process_version "$project_id" "$version_id" || return $(error "$FUNCNAME" 'process_version' "$?")
+                else
+                    process_project "$project_id" || return $(error "$FUNCNAME" 'process_project' "$?")
+                fi
             fi
-        fi
-    done
+        done
 }
 
 process_project() {
@@ -170,7 +173,7 @@ process_project() {
 
     VERSIONS=$(get_project_versions "$1") || return $(error "$FUNCNAME" 'get_project_versions'"$?")
     MOST_RECENT_VERSION=$(get_most_recent_version "$VERSIONS") || return $(error "$FUNCNAME" 'get_most_recent_version' "$?")
-    if [ "x$MOST_RECENT_VERSION" = "x" ] || [ "$MOST_RECENT_VERSION" = "null" ]; then
+    if [ -z ${MOST_RECENT_VERSION+x} ] || [ "$MOST_RECENT_VERSION" = "null" ]; then
         return $(error "$FUNCNAME" "no matching versions for project ID '$1'" "$ERROR_GENERAL")
     fi
 
@@ -181,21 +184,28 @@ subcommand_download() {
     CWD=$(pwd) || return $(error "$FUNCNAME" 'pwd' "$?")
     cd $(mktemp -d) || return $(error "$FUNCNAME" 'mktemp' "$?")
 
-    for project in "$@"; do
-        # Download all files related to the project and the specified minecraft version
-        ARTEFACTS=$(process_project "$project") || return $(error "$FUNCNAME" 'process_project' "$?")
+    debug "$FUNCNAME" "($*)"
+    debug "$FUNCNAME" "$(export -p)"
+    debug "$FUNCNAME" "$(readonly -p)"
+    debug "$FUNCNAME" "$(local)"
+    echo "$*" |
+        while read -d' ' -r project; do
+            debug "$FUNCNAME" "project=$project"
+            break 1
+            # Download all files related to the project and the specified minecraft version
+            ARTEFACTS=$(process_project "$project") || break $(error "$FUNCNAME" 'process_project' "$?")
 
-        # Copy the resultant files to the destination directory
-        if [ "x$DESTINATION" != "x" ]; then
-            for artefact in $ARTEFACTS; do
-                install -v -m 0600 -D -t "$DESTINATION" "$artefact" || return $(error "$FUNCNAME" 'install' "$?")
-            done
-        else
-            for artefact in $ARTEFACTS; do
-                install -v -m 0600 -D -t "$CWD" "$artefact" || return $(error "$FUNCNAME" 'install' "$?")
-            done
-        fi
-    done
+            # Copy the resultant files to the destination directory
+            if [ -z ${DESTINATION+x} ]; then
+                for artefact in $ARTEFACTS; do
+                    install -v -m 0600 -D -t "$DESTINATION" "$artefact" || break $(error "$FUNCNAME" 'install' "$?")
+                done
+            else
+                for artefact in $ARTEFACTS; do
+                    install -v -m 0600 -D -t "$CWD" "$artefact" || break $(error "$FUNCNAME" 'install' "$?")
+                done
+            fi
+        done || return $?
 
     cd $CWD
 }
@@ -205,53 +215,38 @@ main() {
         show_help_and_exit || return
     fi
 
-    ARGS=$(getopt 'vhl:t:V:D:' $*) || show_help_and_exit || return
-
-    set -- $ARGS
-
-    while :; do
-        case "$1" in
-            -v)
-                DEBUG=1
-                shift
+    # Parse the command line options
+    while getopts 'dhl:t:V:O:' opt; do
+        eprintln '%s' "$opt"
+        case "$opt" in
+            -d)
+                export DEBUG=1
+                eprintln 'debugging active'
                 ;;
             -h) 
-                show_help_and_exit || return
-                ;;
+                show_help_and_exit || return;;
             -V)
-                MINECRAFT_VERSION="$2"
-                shift
-                shift
-                ;;
-            -D)
-                RAW_DESTINATION="$2"
-                shift
-                shift
-                ;;
+                export MINECRAFT_VERSION="$OPTARG";;
+            -O)
+                export RAW_DESTINATION="$OPTARG";;
             -t)
-                MODRINTH_PAT="$2"
-                shift
-                shift
-                ;;
+                export MODRINTH_PAT="$OPTARG";;
             -l)
-                MODRINTH_LOADER="$2"
-                shift
-                shift
-                ;;
-            --)
-                shift
-                break
-                ;;
+                export MODRINTH_LOADER="$OPTARG";;
         esac
     done
+    eprintln '%s' "$(export -p)"
+    shift $(($OPTIND - 1))
 
     # Parse the subcommand
+    local SUBCOMMAND
     case "$1" in
         help)
             show_help_and_exit || return
             ;;
         download)
             SUBCOMMAND="download"
+            shift
             ;;
         *) 
             eprintln 'invalid subcommand "%s"' "$1"
@@ -259,32 +254,30 @@ main() {
             ;;
     esac
 
-    shift
-
     # Ensure that the Modrinth API token is set
-    if [ "x$MODRINTH_PAT" = "x" ]; then
+    if [ -z ${MODRINTH_PAT+x} ]; then
         eprintln 'missing Modrinth personal authentication token (variable "MODRINTH_PAT")'
         show_help_and_exit || return
     fi
 
     # Ensure that the Minecraft version is set
-    if [ "x$MINECRAFT_VERSION" = "x" ]; then
+    if [ -z ${MINECRAFT_VERSION+x} ]; then
         eprintln 'missing Minecraft version (variable "MINECRAFT_VERSION")'
         show_help_and_exit || return
     fi
 
+    # If the loader is not set, use the default
+    if [ -z ${MODRINTH_LOADER+x} ]; then
+        export MODRINTH_LOADER="$MODRINTH_DEFAULT_LOADER"
+    fi
+
     # Ensure that the destination is real path
-    if [ "x$RAW_DESTINATION" != "x" ]; then
-        DESTINATION=$(realpath "$RAW_DESTINATION")
+    if [ ! -z ${RAW_DESTINATION+x} ]; then
+        export DESTINATION=$(realpath "$RAW_DESTINATION")
         if [ $? -ne 0 ]; then
             eprintln 'no such file or directory "%s"' "$RAW_DESTINATION"
             show_help_and_exit || return
         fi
-    fi
-
-    # If the loader is not set, use the default
-    if [ "x$MODRINTH_LOADER" = "x" ]; then
-        MODRINTH_LOADER="$MODRINTH_DEFAULT_LOADER"
     fi
 
     case $SUBCOMMAND in
