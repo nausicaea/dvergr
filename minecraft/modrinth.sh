@@ -159,19 +159,19 @@ process_version() {
 
 process_dependencies() {
     debug "${FUNCNAME}" "(dependencies: $1)"
-    echo "$1" \
-           | while read -r dependency; do
-            debug "${FUNCNAME}" "processing dependency '$dependency'"
-            project_id="$(echo "$dependency" | cut -f1 -d',')" || return "$(error "${FUNCNAME}" 'project_id cut' "$?")"
-            version_id="$(echo "$dependency" | cut -f2 -d',')" || return "$(error "${FUNCNAME}" 'version_id cut' "$?")"
-            if [ -n "${project_id+x}" ] && [ "$project_id" != "null" ]; then
-                if [ -n "${version_id+x}" ] && [ "$version_id" != "null" ]; then
-                    process_version "$project_id" "$version_id" || return "$(error "${FUNCNAME}" 'process_version' "$?")"
-                else
-                    process_project "$project_id" || return "$(error "${FUNCNAME}" 'process_project' "$?")"
-                fi
+    for dependency in $1; do
+        debug "${FUNCNAME}" "processing dependency '$dependency'"
+        break 1
+        project_id="$(echo "$dependency" | cut -f1 -d',')" || return "$(error "${FUNCNAME}" 'project_id cut' "$?")"
+        version_id="$(echo "$dependency" | cut -f2 -d',')" || return "$(error "${FUNCNAME}" 'version_id cut' "$?")"
+        if [ -n "${project_id+x}" ] && [ "$project_id" != "null" ]; then
+            if [ -n "${version_id+x}" ] && [ "$version_id" != "null" ]; then
+                process_version "$project_id" "$version_id" || return "$(error "${FUNCNAME}" 'process_version' "$?")"
+            else
+                process_project "$project_id" || return "$(error "${FUNCNAME}" 'process_project' "$?")"
             fi
-        done
+        fi
+    done
 }
 
 process_project() {
@@ -191,26 +191,23 @@ subcommand_download() {
     cd "$(mktemp -d)" || return "$(error "${FUNCNAME}" 'mktemp' "$?")"
 
     debug "${FUNCNAME}" "($*)"
-    debug "${FUNCNAME}" "$(export -p)"
-    debug "${FUNCNAME}" "$(readonly -p)"
-    echo "$*" \
-           | while read -r project; do
-            debug "${FUNCNAME}" "project=$project"
-            break 1
-            # Download all files related to the project and the specified minecraft version
-            ARTEFACTS=$(process_project "$project") || break "$(error "${FUNCNAME}" 'process_project' "$?")"
+    for project in "$@"; do
+        debug "${FUNCNAME}" "project=$project"
 
-            # Copy the resultant files to the destination directory
-            if [ -z ${DESTINATION+x} ]; then
-                for artefact in $ARTEFACTS; do
-                    install -v -m 0600 -D -t "$DESTINATION" "$artefact" || break "$(error "${FUNCNAME}" 'install' "$?")"
-                done
-            else
-                for artefact in $ARTEFACTS; do
-                    install -v -m 0600 -D -t "$CWD" "$artefact" || break "$(error "${FUNCNAME}" 'install' "$?")"
-                done
-            fi
-        done || return $?
+        # Download all files related to the project and the specified minecraft version
+        ARTEFACTS=$(process_project "$project") || break "$(error "${FUNCNAME}" 'process_project' "$?")"
+
+        # Copy the resultant files to the destination directory
+        if [ -z ${DESTINATION+x} ]; then
+            for artefact in $ARTEFACTS; do
+                install -v -m 0600 -D -t "$DESTINATION" "$artefact" || break "$(error "${FUNCNAME}" 'install' "$?")"
+            done
+        else
+            for artefact in $ARTEFACTS; do
+                install -v -m 0600 -D -t "$CWD" "$artefact" || break "$(error "${FUNCNAME}" 'install' "$?")"
+            done
+        fi
+    done
 
     cd "$CWD"
 }
@@ -248,7 +245,6 @@ main() {
                 ;;
         esac
     done
-    eprintln '%s' "$(export -p)"
     shift $((OPTIND - 1))
 
     # Parse the subcommand
