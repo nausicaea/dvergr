@@ -1,9 +1,20 @@
-#!/bin/python3
+#!/usr/bin/env python3
 
 import argparse
+import hashlib
+import http
+import json
 import os
+import shutil
+import stat
+import tempfile
+import urllib.request
+from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Any, Iterable
+
+MODRINTH_BASE_URL = "https://api.modrinth.com"
+USER_AGENT = "nausicaea/minecraft/0.1.0 (developer@nausicaea.net)"
 
 
 class EnvDefault(argparse.Action):
@@ -19,15 +30,205 @@ class EnvDefault(argparse.Action):
         setattr(namespace, self.dest, values)
 
 
+def get_modrinth_request(url: str, modrinth_pat: str) -> Any:
+    req = urllib.request.Request(
+        url,
+        headers={
+            "Authorization": modrinth_pat,
+            "User-Agent": USER_AGENT,
+        },
+    )
+    with urllib.request.urlopen(req) as resp:
+        if resp.status != http.HTTPStatus.OK:
+            raise NotImplementedError()
+
+        if not resp.headers["Content-Type"].startswith("application/json"):
+            raise NotImplementedError()
+
+        body = resp.read().decode("utf-8")
+
+        return json.loads(body)
+
+
+def get_project_versions(
+    project_id: str, modrinth_loader: str, minecraft_version: str, modrinth_pat: str
+) -> Any:
+    url = f"{MODRINTH_BASE_URL}/v2/project/{project_id}/version?loaders=%5B%22{modrinth_loader}%22%5D&game_versions=%5B%22{minecraft_version}%22%5D"
+    return get_modrinth_request(url, modrinth_pat)
+
+
+def get_version(
+    project_id: str,
+    version_id: str,
+    modrinth_loader: str,
+    minecraft_version: str,
+    modrinth_pat: str,
+) -> Any:
+    url = f"{MODRINTH_BASE_URL}/v2/project/{project_id}/version/{version_id}"
+    return get_modrinth_request(url, modrinth_pat)
+
+
+def get_primary_files(version: Any) -> Iterable[Any]:
+    return filter(lambda f: f["primary"], version["files"])
+
+
+def get_most_recent_version(versions: Any, modrinth_loader: str) -> Any:
+    return max(
+        filter(lambda v: modrinth_loader in v["loaders"], versions),
+        key=lambda v: datetime.strptime(
+            v["date_published"].split(".")[0], "%Y-%m-%dT%H:%M:%S"
+        ),
+    )
+
+
+def get_required_dependencies(version: Any) -> Any:
+    return filter(lambda f: f["dependency_type"] == "required", version["dependencies"])
+
+
+def read_in_chunks(file_object, chunk_size=1024):
+    while True:
+        data = file_object.read(chunk_size)
+        if data is None:
+            break
+        yield data
+
+
+def sha512_chunked(file: Path, chunk_size=1024) -> str:
+    hasher = hashlib.sha512()
+    with file.open("rb") as f:
+        for chunk in read_in_chunks(f, chunk_size=chunk_size):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+
+def sha512(file: Path) -> str:
+    return hashlib.sha512(file.open("rb").read()).hexdigest()
+
+
+def download_files(files: Any, dest: Path) -> list[Path]:
+    artifacts = list()
+    for file in files:
+        url = file["url"]
+        checksum = file["hashes"]["sha512"]
+        filename = file["filename"]
+        file_dest = dest.joinpath(filename)
+        artifacts.append(file_dest)
+        (_, http_msg) = urllib.request.urlretrieve(url, file_dest)
+        if http_msg.get("Content-Type") not in ["application/java-archive"]:
+            raise NotImplementedError()
+        file_hash = sha512(file_dest)
+        if file_hash != checksum:
+            raise NotImplementedError()
+
+    return artifacts
+
+
+def process_version_by_id(
+    project_id, version_id, dest, modrinth_loader, minecraft_version, modrinth_pat
+) -> list[Path]:
+    version = get_version(
+        project_id, version_id, modrinth_loader, minecraft_version, modrinth_pat
+    )
+    return process_version(
+        version, dest, modrinth_loader, minecraft_version, modrinth_pat
+    )
+
+
+def process_dependencies(
+    dependencies: Any, dest: Path, modrinth_loader, minecraft_version, modrinth_pat
+) -> list[Path]:
+    artifacts = list()
+
+    for dependency in dependencies:
+        project_id = dependency["project_id"]
+        version_id = dependency["version_id"]
+        if project_id is not None:
+            if version_id is not None:
+                artifacts.extend(
+                    process_version_by_id(
+                        project_id,
+                        version_id,
+                        dest,
+                        modrinth_loader,
+                        minecraft_version,
+                        modrinth_pat,
+                    )
+                )
+            else:
+                artifacts.extend(
+                    process_project(
+                        project_id,
+                        dest,
+                        modrinth_loader,
+                        minecraft_version,
+                        modrinth_pat,
+                    )
+                )
+
+    return artifacts
+
+
+def process_version(
+    version, dest: Path, modrinth_loader, minecraft_version, modrinth_pat
+) -> list[Path]:
+    primary_files = get_primary_files(version)
+
+    artifacts = download_files(primary_files, dest)
+
+    dependencies = get_required_dependencies(version)
+
+    artifacts.extend(
+        process_dependencies(
+            dependencies, dest, modrinth_loader, minecraft_version, modrinth_pat
+        )
+    )
+
+    return artifacts
+
+
+def process_project(
+    project_id: str,
+    dest: Path,
+    modrinth_loader: str,
+    minecraft_version: str,
+    modrinth_pat: str,
+) -> list[Path]:
+    versions = get_project_versions(
+        project_id, modrinth_loader, minecraft_version, modrinth_pat
+    )
+    most_recent_version = get_most_recent_version(versions, modrinth_loader)
+    return process_version(
+        most_recent_version, dest, modrinth_loader, minecraft_version, modrinth_pat
+    )
+
+
 def download_project_artifacts(
     mc_version: str,
     loader: str,
     output: Path,
     projects: list[str],
-    api_token: Optional[str],
+    api_token: str,
     debug: bool = False,
 ):
-    raise NotImplementedError()
+    # Change to a temporary directory
+    with tempfile.TemporaryDirectory() as temp:
+        temp_dest = Path(temp)
+
+        # Process all projects
+        artifacts: list[Path] = list()
+        for project in projects:
+            artifacts.extend(
+                process_project(project, temp_dest, loader, mc_version, api_token)
+            )
+
+        # Copy the artifacts into the destination directory
+        for artifact in artifacts:
+            if not output.is_dir():
+                output.mkdir(parents=True)
+
+            artifact_dest = output.joinpath(artifact.name)
+            shutil.copyfile(artifact, artifact_dest)
+            os.chmod(artifact_dest, stat.S_IRUSR | stat.S_IWUSR)
 
 
 def main():

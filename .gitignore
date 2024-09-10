@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/macos,linux,windows,direnv,java,gradle
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,linux,windows,direnv,java,gradle
 
+### JetBrains ###
+.idea
+
 ### direnv ###
 .direnv
 .env
