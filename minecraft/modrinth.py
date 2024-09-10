@@ -8,6 +8,7 @@ import os
 import shutil
 import stat
 import tempfile
+import urllib.error
 import urllib.request
 from datetime import datetime
 from pathlib import Path
@@ -38,34 +39,43 @@ def get_modrinth_request(url: str, modrinth_pat: str) -> Any:
             "User-Agent": USER_AGENT,
         },
     )
-    with urllib.request.urlopen(req) as resp:
-        if resp.status != http.HTTPStatus.OK:
-            raise NotImplementedError()
+    try:
+        with urllib.request.urlopen(req) as resp:
+            if resp.status != http.HTTPStatus.OK:
+                raise NotImplementedError()
 
-        if not resp.headers["Content-Type"].startswith("application/json"):
-            raise NotImplementedError()
+            if not resp.headers["Content-Type"].startswith("application/json"):
+                raise NotImplementedError()
 
-        body = resp.read().decode("utf-8")
+            body = resp.read().decode("utf-8")
 
-        return json.loads(body)
+            return json.loads(body)
+    except urllib.error.HTTPError:
+        raise ValueError(f'Error requesting URL "{url}"')
 
 
 def get_project_versions(
     project_id: str, modrinth_loader: str, minecraft_version: str, modrinth_pat: str
 ) -> Any:
     url = f"{MODRINTH_BASE_URL}/v2/project/{project_id}/version?loaders=%5B%22{modrinth_loader}%22%5D&game_versions=%5B%22{minecraft_version}%22%5D"
-    return get_modrinth_request(url, modrinth_pat)
+    try:
+        return get_modrinth_request(url, modrinth_pat)
+    except ValueError:
+        raise ValueError(f'Error obtaining versions for the project "{project_id}"')
 
 
 def get_version(
     project_id: str,
     version_id: str,
-    modrinth_loader: str,
-    minecraft_version: str,
     modrinth_pat: str,
 ) -> Any:
     url = f"{MODRINTH_BASE_URL}/v2/project/{project_id}/version/{version_id}"
-    return get_modrinth_request(url, modrinth_pat)
+    try:
+        return get_modrinth_request(url, modrinth_pat)
+    except ValueError:
+        raise ValueError(
+            f'Error obtaining version "{version_id}" from project "{project_id}"'
+        )
 
 
 def get_primary_files(version: Any) -> Iterable[Any]:
@@ -114,11 +124,18 @@ def download_files(files: Any, dest: Path) -> list[Path]:
         file_dest = dest.joinpath(filename)
         artifacts.append(file_dest)
         (_, http_msg) = urllib.request.urlretrieve(url, file_dest)
-        if http_msg.get("Content-Type") not in ["application/java-archive"]:
-            raise NotImplementedError()
+        if http_msg.get("Content-Type") not in [
+            "application/java-archive",
+            "application/zip",
+        ]:
+            raise ValueError(
+                "The artifact content type must be either a JAR archive or a ZIP file"
+            )
         file_hash = sha512(file_dest)
         if file_hash != checksum:
-            raise NotImplementedError()
+            raise ValueError(
+                f'Artifact hash mismatch: expected "{checksum}", got "{file_hash}"'
+            )
 
     return artifacts
 
@@ -126,9 +143,7 @@ def download_files(files: Any, dest: Path) -> list[Path]:
 def process_version_by_id(
     project_id, version_id, dest, modrinth_loader, minecraft_version, modrinth_pat
 ) -> list[Path]:
-    version = get_version(
-        project_id, version_id, modrinth_loader, minecraft_version, modrinth_pat
-    )
+    version = get_version(project_id, version_id, modrinth_pat)
     return process_version(
         version, dest, modrinth_loader, minecraft_version, modrinth_pat
     )
