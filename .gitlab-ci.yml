@@ -13,7 +13,7 @@
     - /kaniko/executor
       --context "./minecraft"
       --dockerfile "./minecraft/Dockerfile"
-      --destination "${CI_REGISTRY_IMAGE}-${ARCH}:${CI_COMMIT_SHA}"
+      --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${ARCH}"
       --build-arg "MODRINTH_PAT=$MODRINTH_PAT"
       --build-arg "MINECRAFT_VERSION=$MINECRAFT_VERSION"
       --build-arg "FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION"
@@ -46,7 +46,7 @@
   script:
     - ./manifest-tool --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" push from-args
       --platforms linux/amd64,linux/arm64/v8
-      --template ${CI_REGISTRY_IMAGE}-ARCH:${CI_COMMIT_SHA}
+      --template ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-ARCH
       --tags ${CI_COMMIT_SHA}
       --target ${CI_REGISTRY_IMAGE}:latest
 
