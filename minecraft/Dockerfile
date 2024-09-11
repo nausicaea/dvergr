@@ -61,7 +61,8 @@ COPY --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
 COPY --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
 USER minecraft:minecraft
 WORKDIR /var/lib/minecraft
-RUN java \
+RUN --mount=type=bind,target=/tmp/log4j2-build.xml,source=./log4j2-build.xml java \
+    -Dlog4j.configurationFile=/tmp/log4j2-build.xml \
     -jar /usr/local/lib/fabric-launcher.jar \
     --universe /var/lib/minecraft/universe \
     --initSettings

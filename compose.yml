@@ -24,6 +24,9 @@ services:
         YARN_MAPPINGS_VERSION: 1.20.4+build.3
         OTEL_JAVAAGENT_VERSION: 1.33.5
         OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
+      platforms:
+        - linux/amd64
+        - linux/arm64
     container_name: minecraft_setup
     user: root
     entrypoint:
