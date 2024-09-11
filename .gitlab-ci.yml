@@ -31,7 +31,7 @@
 .build_arm64:
   extends: .build_amd64
   tags:
-    - saas-linux-small-arm64
+    - saas-linux-medium-arm64
   variables:
     ARCH: arm64
 
