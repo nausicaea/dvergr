@@ -32,8 +32,8 @@ JAVA_OPTS=" \
     -javaagent:/usr/local/lib/opentelemetry-javaagent.jar \
 "
 
-exec java \
-    "${JAVA_OPTS}" \
+exec /opt/java/openjdk/bin/java \
+    ${JAVA_OPTS} \
     -jar /usr/local/lib/fabric-launcher.jar \
     --serverId "${MINECRAFT_SERVER_ID}" \
     --universe /var/lib/minecraft/universe \
