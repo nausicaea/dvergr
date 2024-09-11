@@ -7,6 +7,7 @@ default:
     services:
         - name: docker.io/library/docker:27-dind
           alias: docker
+        - name: multiarch/qemu-user-static
     before_script:
         - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
 
@@ -48,8 +49,7 @@ build:
                 --label="org.opencontainers.image.created=$CI_JOB_STARTED_AT" \
                 --label="org.opencontainers.image.revision=$CI_COMMIT_SHA" \
                 --label="org.opencontainers.image.version=$CI_COMMIT_REF_NAME" \
-                --tag=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA \
-                --platform=linux/amd64,linux/arm64 \
+                --tag=$CI_REGISTRY_IMAGE:${CI_COMMIT_SHA} \
                 ./minecraft
         - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
 
