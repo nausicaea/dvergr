@@ -1,76 +1,105 @@
+.build_amd64:
+  needs: []
+  tags:
+    - saas-linux-small-amd64
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.1-debug
+    entrypoint: [""]
+  variables:
+    ARCH: amd64
+  before_script:
+    - echo "{\"auths\":{\"${CI_REGISTRY_URL}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+  script:
+    - /kaniko/executor
+      --context "./minecraft"
+      --dockerfile "./minecraft/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}-${ARCH}:${CI_COMMIT_SHA}"
+      --build-arg "MODRINTH_PAT=$MODRINTH_PAT"
+      --build-arg "MINECRAFT_VERSION=$MINECRAFT_VERSION"
+      --build-arg "FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION"
+      --build-arg "FABRIC_LOADER_CHECKSUM=$FABRIC_LOADER_CHECKSUM"
+      --build-arg "FABRIC_INSTALLER_VERSION=$FABRIC_INSTALLER_VERSION"
+      --build-arg "YARN_MAPPINGS_VERSION=$YARN_MAPPINGS_VERSION"
+      --build-arg "OTEL_JAVAAGENT_VERSION=$OTEL_JAVAAGENT_VERSION"
+      --build-arg "OTEL_JAVAAGENT_CHECKSUM=$OTEL_JAVAAGENT_CHECKSUM"
+      --label "org.opencontainers.image.title=$CI_PROJECT_TITLE"
+      --label "org.opencontainers.image.url=$CI_PROJECT_URL"
+      --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
+      --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
+      --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
+
+.build_arm64:
+  extends: .build_amd64
+  tags:
+    - saas-linux-small-arm64
+  variables:
+    ARCH: arm64
+
+.build_multi_arch:
+  image:
+    name: curlimages/curl:latest
+    entrypoint: [""]
+  before_script:
+    - curl -s -L https://github.com/estesp/manifest-tool/releases/download/v2.0.8/binaries-manifest-tool-2.0.8.tar.gz | tar xvz
+    - mv manifest-tool-linux-amd64 manifest-tool
+    - chmod +x manifest-tool
+  script:
+    - ./manifest-tool --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" push from-args
+      --platforms linux/amd64,linux/arm64/v8
+      --template ${CI_REGISTRY_IMAGE}-ARCH:${CI_COMMIT_SHA}
+      --tags ${CI_COMMIT_SHA}
+      --target ${CI_REGISTRY_IMAGE}:latest
+
+.build_config: &build_config
+  variables:
+    MINECRAFT_VERSION: 1.20.4
+    FABRIC_LOADER_VERSION: 0.16.2
+    FABRIC_LOADER_CHECKSUM: sha256:45bf5969b76cc046dcb042375001fd7b6934f6a05c05c20bb53ae6b895c23439
+    FABRIC_INSTALLER_VERSION: 1.0.1
+    YARN_MAPPINGS_VERSION: 1.20.4+build.3
+    OTEL_JAVAAGENT_VERSION: 1.33.5
+    OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
+
 stages:
-    - build
-    - push
+  - build
+  - push
+  - tag
 
-default:
-    image: docker.io/library/docker:27
-    services:
-        - name: docker.io/library/docker:27-dind
-          alias: docker
-        - name: multiarch/qemu-user-static
-    before_script:
-        - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
-variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
+minecraft [amd64]:
+  <<: *build_config
+  extends: .build_amd64
+  stage: build
 
-build:
-    stage: build
-    tags:
-        - saas-linux-small-amd64
-    variables:
-      MINECRAFT_VERSION: 1.20.4
-      FABRIC_LOADER_VERSION: 0.16.2
-      FABRIC_LOADER_CHECKSUM: sha256:45bf5969b76cc046dcb042375001fd7b6934f6a05c05c20bb53ae6b895c23439
-      FABRIC_INSTALLER_VERSION: 1.0.1
-      YARN_MAPPINGS_VERSION: 1.20.4+build.3
-      OTEL_JAVAAGENT_VERSION: 1.33.5
-      OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
-    before_script:
-        - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-        - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    script:
-        - docker pull $CI_REGISTRY_IMAGE:latest || true
-        - |
-            docker build \
-                --pull \
-                --cache-from=$CI_REGISTRY_IMAGE:latest \
-                --build-arg="MODRINTH_PAT=$MODRINTH_PAT" \
-                --build-arg="MINECRAFT_VERSION=$MINECRAFT_VERSION" \
-                --build-arg="FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION" \
-                --build-arg="FABRIC_LOADER_CHECKSUM=$FABRIC_LOADER_CHECKSUM" \
-                --build-arg="FABRIC_INSTALLER_VERSION=$FABRIC_INSTALLER_VERSION" \
-                --build-arg="YARN_MAPPINGS_VERSION=$YARN_MAPPINGS_VERSION" \
-                --build-arg="OTEL_JAVAAGENT_VERSION=$OTEL_JAVAAGENT_VERSION" \
-                --build-arg="OTEL_JAVAAGENT_CHECKSUM=$OTEL_JAVAAGENT_CHECKSUM" \
-                --label="org.opencontainers.image.title=$CI_PROJECT_TITLE" \
-                --label="org.opencontainers.image.url=$CI_PROJECT_URL" \
-                --label="org.opencontainers.image.created=$CI_JOB_STARTED_AT" \
-                --label="org.opencontainers.image.revision=$CI_COMMIT_SHA" \
-                --label="org.opencontainers.image.version=$CI_COMMIT_REF_NAME" \
-                --tag=$CI_REGISTRY_IMAGE:${CI_COMMIT_SHA} \
-                ./minecraft
-        - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+minecraft [arm64]:
+  <<: *build_config
+  extends: .build_arm64
+  stage: build
 
-push_latest:
-    stage: push
-    variables:
-        GIT_STRATEGY: none
-    only:
-        - main
-    script:
-        - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-        - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest
-        - docker push $CI_REGISTRY_IMAGE:latest
+minecraft [multi-arch]:
+  <<: *build_config
+  extends: .build_multi_arch
+  stage: push
 
 push_tagged:
-    variables:
-        GIT_STRATEGY: none
-    stage: push
+    stage: tag
     only:
-        - tags
+      - tags
+    services:
+      - name: docker.io/library/docker:27-dind
+        alias: docker
+    variables:
+      GIT_STRATEGY: none
+      DOCKER_HOST: tcp://docker:2375
+      DOCKER_TLS_CERTDIR: ""
+    before_script:
+      - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     script:
-        - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
-        - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-        - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+      - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+      - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+      - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+
