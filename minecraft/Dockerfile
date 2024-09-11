@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM docker.io/library/gradle:8.10-jdk21-alpine AS builder
+FROM docker.io/library/gradle:8.10.1-jdk21-alpine AS builder
 ARG MINECRAFT_VERSION
 ARG YARN_MAPPINGS_VERSION
 ARG FABRIC_LOADER_VERSION
@@ -8,7 +8,7 @@ WORKDIR /src
 COPY otel-mod /src
 RUN --mount=type=cache,target=/src/.gradle gradle --no-daemon :assemble
 
-FROM docker.io/library/alpine:latest AS downloader
+FROM docker.io/library/alpine:3.20.3 AS downloader
 ARG MODRINTH_PAT
 ARG MINECRAFT_VERSION
 ARG FABRIC_LOADER_VERSION
@@ -45,7 +45,7 @@ RUN /bin/modrinth -d -O /artefacts/datapacks -l datapack \
     new-in-town \
     new-in-town-dimensions
 
-FROM docker.io/library/eclipse-temurin:21-jre-alpine@sha256:3f716d52e4045433e94a28d029c93d3c23179822a5d40b1c82b63aedd67c5081
+FROM docker.io/library/eclipse-temurin:21.0.4_7-jre-alpine
 VOLUME ["/var/lib/minecraft/.fabric", "/var/lib/minecraft/config", "/var/lib/minecraft/logs", "/var/lib/minecraft/crash-reports", "/var/lib/minecraft/mods", "/var/lib/minecraft/universe"]
 EXPOSE 30000/tcp 30001/udp
 ARG MINECRAFT_VERSION
