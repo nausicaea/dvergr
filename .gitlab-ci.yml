@@ -1,19 +1,18 @@
+stages:
+    - build
+    - push
+
 default:
     image: docker.io/library/docker:27
     services:
         - name: docker.io/library/docker:27-dind
           alias: docker
     before_script:
-        - docker info
         - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
 
 variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
-
-stages:
-    - build
-    - push
 
 build:
     stage: build
@@ -27,6 +26,9 @@ build:
       YARN_MAPPINGS_VERSION: 1.20.4+build.3
       OTEL_JAVAAGENT_VERSION: 1.33.5
       OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
+    before_script:
+        - echo -n $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+        - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
     script:
         - docker pull $CI_REGISTRY_IMAGE:latest || true
         - |
@@ -47,10 +49,11 @@ build:
                 --label="org.opencontainers.image.revision=$CI_COMMIT_SHA" \
                 --label="org.opencontainers.image.version=$CI_COMMIT_REF_NAME" \
                 --tag=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA \
+                --platform=linux/amd64,linux/arm64 \
                 ./minecraft
         - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
 
-push-latest:
+push_latest:
     stage: push
     variables:
         GIT_STRATEGY: none
@@ -61,7 +64,7 @@ push-latest:
         - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest
         - docker push $CI_REGISTRY_IMAGE:latest
 
-push-tagged:
+push_tagged:
     variables:
         GIT_STRATEGY: none
     stage: push
