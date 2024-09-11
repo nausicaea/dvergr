@@ -24,8 +24,8 @@ AIKAR_FLAGS=" \
 
 # Defines command line options for the Java invocation
 JAVA_OPTS=" \
-    -Xms${JAVA_INITIAL_MEM} \
-    -Xmx${JAVA_MAX_MEM} \
+    -Xms${JAVA_INITIAL_MEM:-256m} \
+    -Xmx${JAVA_MAX_MEM:-4G} \
     ${AIKAR_FLAGS} \
     -Dlog4j.configurationFile=/var/lib/minecraft/log4j2.xml \
     -Dotel.javaagent.configuration-file=/var/lib/minecraft/opentelemetry.properties \
@@ -35,6 +35,6 @@ JAVA_OPTS=" \
 exec /opt/java/openjdk/bin/java \
     ${JAVA_OPTS} \
     -jar /usr/local/lib/fabric-launcher.jar \
-    --serverId "${MINECRAFT_SERVER_ID}" \
+    --serverId "${MINECRAFT_SERVER_ID:-minecraft}" \
     --universe /var/lib/minecraft/universe \
     --nogui
