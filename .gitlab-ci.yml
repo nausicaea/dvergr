@@ -19,6 +19,14 @@ build:
     stage: build
     tags:
         - saas-linux-small-amd64
+    variables:
+      MINECRAFT_VERSION: 1.20.4
+      FABRIC_LOADER_VERSION: 0.16.2
+      FABRIC_LOADER_CHECKSUM: sha256:45bf5969b76cc046dcb042375001fd7b6934f6a05c05c20bb53ae6b895c23439
+      FABRIC_INSTALLER_VERSION: 1.0.1
+      YARN_MAPPINGS_VERSION: 1.20.4+build.3
+      OTEL_JAVAAGENT_VERSION: 1.33.5
+      OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
     script:
         - docker pull $CI_REGISTRY_IMAGE:latest || true
         - |
@@ -26,13 +34,13 @@ build:
                 --pull \
                 --cache-from=$CI_REGISTRY_IMAGE:latest \
                 --build-arg="MODRINTH_PAT=$MODRINTH_PAT" \
-                --build-arg="MINECRAFT_VERSION=1.20.4" \
-                --build-arg="FABRIC_LOADER_VERSION=0.16.2" \
-                --build-arg="FABRIC_LOADER_CHECKSUM=sha256:45bf5969b76cc046dcb042375001fd7b6934f6a05c05c20bb53ae6b895c23439" \
-                --build-arg="FABRIC_INSTALLER_VERSION=1.0.1" \
-                --build-arg="YARN_MAPPINGS_VERSION=1.20.4+build.3" \
-                --build-arg="OTEL_JAVAAGENT_VERSION=1.33.5" \
-                --build-arg="OTEL_JAVAAGENT_CHECKSUM=sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce" \
+                --build-arg="MINECRAFT_VERSION=$MINECRAFT_VERSION" \
+                --build-arg="FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION" \
+                --build-arg="FABRIC_LOADER_CHECKSUM=$FABRIC_LOADER_CHECKSUM" \
+                --build-arg="FABRIC_INSTALLER_VERSION=$FABRIC_INSTALLER_VERSION" \
+                --build-arg="YARN_MAPPINGS_VERSION=$YARN_MAPPINGS_VERSION" \
+                --build-arg="OTEL_JAVAAGENT_VERSION=$OTEL_JAVAAGENT_VERSION" \
+                --build-arg="OTEL_JAVAAGENT_CHECKSUM=$OTEL_JAVAAGENT_CHECKSUM" \
                 --label="org.opencontainers.image.title=$CI_PROJECT_TITLE" \
                 --label="org.opencontainers.image.url=$CI_PROJECT_URL" \
                 --label="org.opencontainers.image.created=$CI_JOB_STARTED_AT" \
