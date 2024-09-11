@@ -53,8 +53,8 @@ ENV JAVA_MAX_MEM=2G
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 
 RUN set -xe; \
-    addgroup -S minecraft; \
-    adduser -S -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft
+    addgroup -S -g 101 minecraft; \
+    adduser -S -u 101 -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft
 COPY --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
 COPY --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
 USER minecraft:minecraft
