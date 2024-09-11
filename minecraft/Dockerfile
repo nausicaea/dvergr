@@ -46,8 +46,6 @@ RUN /bin/modrinth -d -O /artefacts/datapacks -l datapack \
     new-in-town-dimensions
 
 FROM docker.io/library/eclipse-temurin:21.0.4_7-jre-alpine
-VOLUME ["/var/lib/minecraft/.fabric", "/var/lib/minecraft/config", "/var/lib/minecraft/logs", "/var/lib/minecraft/crash-reports", "/var/lib/minecraft/mods", "/var/lib/minecraft/universe"]
-EXPOSE 30000/tcp 30001/udp
 ARG MINECRAFT_VERSION
 ENV MINECRAFT_SERVER_ID=minecraft
 ENV JAVA_INITIAL_MEM=256M
@@ -61,7 +59,7 @@ COPY --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
 COPY --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
 USER minecraft:minecraft
 WORKDIR /var/lib/minecraft
-RUN mkdir -p .fabric config logs crash-reports mods universe
+RUN mkdir -p .fabric backups logs crash-reports universe
 RUN --mount=type=bind,target=/tmp/log4j2-build.xml,source=./log4j2-build.xml java \
     -Dlog4j.configurationFile=/tmp/log4j2-build.xml \
     -jar /usr/local/lib/fabric-launcher.jar \
@@ -72,4 +70,6 @@ COPY --from=builder --chmod=0644 /src/build/libs/otel-0.0.0.jar ./mods/
 COPY --from=downloader --chmod=0644 /artefacts/mods/*.jar ./mods/
 COPY --from=downloader --chmod=0644 /artefacts/datapacks/*.zip ./universe/world/datapacks/
 
+VOLUME ["/var/lib/minecraft/.fabric", "/var/lib/minecraft/backups", "/var/lib/minecraft/logs", "/var/lib/minecraft/crash-reports", "/var/lib/minecraft/universe"]
+EXPOSE 30000/tcp 30001/udp
 ENTRYPOINT ["/bin/docker-entrypoint"]
