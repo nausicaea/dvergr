@@ -11,35 +11,19 @@ services:
     depends_on:
       - minecraft
 
-      # minecraft_setup:
-      #   image: &minecraft registry.gitlab.com/nausicaea/minecraft:latest
-      #   build:
-      #     context: minecraft
-      #     args:
-      #       MODRINTH_PAT: ${MODRINTH_PAT}
-      #       MINECRAFT_VERSION: 1.20.4
-      #       FABRIC_LOADER_VERSION: 0.16.2
-      #       FABRIC_LOADER_CHECKSUM: sha256:45bf5969b76cc046dcb042375001fd7b6934f6a05c05c20bb53ae6b895c23439
-      #       FABRIC_INSTALLER_VERSION: 1.0.1
-      #       YARN_MAPPINGS_VERSION: 1.20.4+build.3
-      #       OTEL_JAVAAGENT_VERSION: 1.33.5
-      #       OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
-      #   container_name: minecraft_setup
-      #   user: root
-      #   entrypoint:
-      #     - chown
-      #     - "-R"
-      #     - "100:101"
-      #     - /var/lib/minecraft
-      #   volumes:
-      #     - backups:/var/lib/minecraft/backups
-      #     - cache:/var/lib/minecraft/.fabric
-      #     - logs:/var/lib/minecraft/logs
-      #     - crash_reports:/var/lib/minecraft/crash-reports
-      #     - universe:/var/lib/minecraft/universe
-
   minecraft:
     image: registry.gitlab.com/nausicaea/minecraft:latest
+    build:
+      context: minecraft
+      args:
+        MODRINTH_PAT: ${MODRINTH_PAT}
+        MINECRAFT_VERSION: 1.20.4
+        FABRIC_LOADER_VERSION: 0.16.2
+        FABRIC_LOADER_CHECKSUM: sha256:45bf5969b76cc046dcb042375001fd7b6934f6a05c05c20bb53ae6b895c23439
+        FABRIC_INSTALLER_VERSION: 1.0.1
+        YARN_MAPPINGS_VERSION: 1.20.4+build.3
+        OTEL_JAVAAGENT_VERSION: 1.33.5
+        OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
     container_name: minecraft
     environment:
       MINECRAFT_SERVER_ID: nausicaea
@@ -47,21 +31,14 @@ services:
       JAVA_MAX_MEM: ${JAVA_MAX_MEM}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel_collector:4317
     volumes:
-      - ./mounts/log4j2.xml:/var/lib/minecraft/log4j2.xml:ro
-      - ./mounts/opentelemetry.properties:/var/lib/minecraft/opentelemetry.properties:ro
-      - ./mounts/server.properties:/var/lib/minecraft/server.properties
-      - ./mounts/ops.json:/var/lib/minecraft/ops.json
-      - ./mounts/whitelist.json:/var/lib/minecraft/whitelist.json
-      - ./mounts/banned-ips.json:/var/lib/minecraft/banned-ips.json
-      - ./mounts/banned-players.json:/var/lib/minecraft/banned-players.json
-      - ./mounts/config:/var/lib/minecraft/config
       - backups:/var/lib/minecraft/backups
       - cache:/var/lib/minecraft/.fabric
-      - logs:/var/lib/minecraft/logs
       - crash_reports:/var/lib/minecraft/crash-reports
+      - logs:/var/lib/minecraft/logs
+      - mod_config:/var/lib/minecraft/config
+      - server_config:/var/lib/minecraft/server-config
       - universe:/var/lib/minecraft/universe
     depends_on:
-      #- minecraft_setup
       - otel_collector
     mem_limit: ${MINECRAFT_MEM_LIMIT}
 
@@ -159,8 +136,10 @@ services:
 volumes:
   backups: {}
   cache: {}
-  logs: {}
   crash_reports: {}
+  logs: {}
+  mod_config: {}
+  server_config: {}
   universe: {}
   tempo: {}
   loki: {}

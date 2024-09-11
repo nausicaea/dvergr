@@ -57,19 +57,23 @@ RUN set -xe; \
     adduser -S -u 101 -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft
 COPY --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
 COPY --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
-USER minecraft:minecraft
 WORKDIR /var/lib/minecraft
-RUN mkdir -p .fabric backups logs crash-reports universe
-RUN --mount=type=bind,target=/tmp/log4j2-build.xml,source=./log4j2-build.xml java \
-    -Dlog4j.configurationFile=/tmp/log4j2-build.xml \
-    -jar /usr/local/lib/fabric-launcher.jar \
-    --universe /var/lib/minecraft/universe \
-    --initSettings
-COPY eula.txt ./
-COPY --from=builder --chmod=0644 /src/build/libs/otel-0.0.0.jar ./mods/
-COPY --from=downloader --chmod=0644 /artefacts/mods/*.jar ./mods/
-COPY --from=downloader --chmod=0644 /artefacts/datapacks/*.zip ./universe/world/datapacks/
+COPY --chmod=0400 eula.txt ./
+COPY --from=builder --chmod=0400 /src/build/libs/otel-0.0.0.jar ./mods/
+COPY --from=downloader --chmod=0400 /artefacts/mods/*.jar ./mods/
+COPY --from=downloader --chmod=0400 /artefacts/datapacks/*.zip ./universe/world/datapacks/
+COPY server-config/ ./server-config/
+COPY mod-config/ ./config/
+RUN set -xe; \
+    mkdir -p .fabric backups config crash-reports logs server-config universe; \
+    ln -s ./server-config/server.properties server.properties; \
+    ln -s ./server-config/whitelist.json whitelist.json; \
+    ln -s ./server-config/ops.json ops.json; \
+    ln -s ./server-config/banned-ips.json banned-ips.json; \
+    ln -s ./server-config/banned-players.json banned-players.json; \
+    chown -R minecraft:minecraft /var/lib/minecraft;
 
-VOLUME ["/var/lib/minecraft/.fabric", "/var/lib/minecraft/backups", "/var/lib/minecraft/logs", "/var/lib/minecraft/crash-reports", "/var/lib/minecraft/universe"]
+VOLUME ["/var/lib/minecraft/.fabric", "/var/lib/minecraft/backups", "/var/lib/minecraft/config", "/var/lib/minecraft/crash-reports", "/var/lib/minecraft/logs", "/var/lib/minecraft/server-config", "/var/lib/minecraft/universe"]
 EXPOSE 30000/tcp 30001/udp
+USER minecraft:minecraft
 ENTRYPOINT ["/bin/docker-entrypoint"]
