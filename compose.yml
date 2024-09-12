@@ -6,6 +6,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
+      - 80:80/tcp
       - 25565:25565/tcp
       - 24454:24454/udp
     depends_on:
@@ -111,6 +112,8 @@ services:
     volumes:
       - ./prometheus/prometheus.yaml:/etc/prometheus.yaml:ro
       - prometheus:/prometheus
+    extra_hosts:
+      - "host.docker.internal=host-gateway"
 
   grafana:
     image: docker.io/grafana/grafana:latest
