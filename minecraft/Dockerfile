@@ -39,7 +39,8 @@ RUN /bin/modrinth -d -O /artefacts/mods -l fabric \
     sleep \
     starlight \
     vanilla-refresh \
-    simple-voice-chat
+    simple-voice-chat \
+    dynamic-lights
 RUN /bin/modrinth -d -O /artefacts/datapacks -l datapack \
     new-in-town \
     new-in-town-dimensions \
