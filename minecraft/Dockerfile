@@ -39,11 +39,14 @@ RUN /bin/modrinth -d -O /artefacts/mods -l fabric \
     sleep \
     starlight \
     vanilla-refresh \
-    simple-voice-chat \
-    biomes-o-plenty
+    simple-voice-chat
 RUN /bin/modrinth -d -O /artefacts/datapacks -l datapack \
     new-in-town \
-    new-in-town-dimensions
+    new-in-town-dimensions \
+    'william-wythers-overhauled-overworld-(datapack)' \
+    towering-tepuis \
+    navigable-rivers \
+    cliffs-and-coves
 
 FROM docker.io/library/eclipse-temurin:21.0.4_7-jre-alpine
 ARG MINECRAFT_VERSION
