@@ -40,7 +40,8 @@ RUN /bin/modrinth -d -O /artefacts/mods -l fabric \
     starlight \
     vanilla-refresh \
     simple-voice-chat \
-    dynamic-lights
+    dynamic-lights \
+    mixintrace
 RUN /bin/modrinth -d -O /artefacts/datapacks -l datapack \
     new-in-town \
     new-in-town-dimensions \
