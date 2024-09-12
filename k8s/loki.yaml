@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-loki
+  labels:
+    app: loki
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loki
+  template:
+    metadata:
+      labels:
+        app: loki
+    spec:
+      containers:
+        - name: main
+          image: docker.io/grafana/loki:3.1.1
+          command:
+            - /usr/bin/loki
+            - --config.file=/etc/loki/config.yaml
+          volumeMounts:
+            - name: loki-config
+              mountPath: /etc/loki
+            - name: loki-data
+              mountPath: /loki
+          ports:
+            - name: loki
+              containerPort: 3100
+      volumes:
+        - name: loki-config
+          configMap:
+            name: grafana-loki
+            items:
+              - key: config.yaml
+                path: config.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki
+  labels:
+    app: grafana-loki
+spec:
+  selector:
+    app: loki
+  ports:
+    - name: loki
+      port: 3100
+      targetPort: loki
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-loki
+  labels:
+    app: loki
+data:
+  config.yaml: |
+    # This is a complete configuration to deploy Loki backed by the filesystem.
+    # The index will be shipped to the storage via tsdb-shipper.
+
+    auth_enabled: false
+
+    limits_config:
+      allow_structured_metadata: true
+      volume_enabled: true
+
+    server:
+      http_listen_port: 3100
+      log_level: error
+
+    common:
+      ring:
+        instance_addr: 0.0.0.0
+        kvstore:
+          store: inmemory
+      replication_factor: 1
+      path_prefix: /loki
+
+    schema_config:
+      configs:
+      - from: 2023-01-05
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+
+    storage_config:
+      filesystem:
+        directory: /loki/chunks
