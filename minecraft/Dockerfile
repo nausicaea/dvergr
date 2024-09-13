@@ -37,7 +37,7 @@ RUN set -xe; \
 COPY --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
 COPY --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
 WORKDIR /var/lib/minecraft
-COPY --chmod=0400 eula.txt server.properties ./
+COPY --chmod=0400 eula.txt server.properties log4j2.xml opentelemetry.properties ./
 COPY --from=builder --chmod=0400 /src/build/libs/otel-0.0.0.jar ./mods/
 COPY --from=downloader --chmod=0400 /artefacts/mods/*.jar ./mods/
 COPY --from=downloader --chmod=0400 /artefacts/datapacks/*.zip ./universe/world/datapacks/

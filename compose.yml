@@ -32,7 +32,9 @@ services:
       JAVA_MAX_MEM: ${JAVA_MAX_MEM}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel_collector:4317
     volumes:
-      - ./server.properties:/var/lib/minecraft/server.properties:ro
+      - ./minecraft/server.properties:/var/lib/minecraft/server.properties:ro
+      - ./minecraft/opentelemetry.properties:/var/lib/minecraft/opentelemetry.properties:ro
+      - ./minecraft/log4j2.xml:/var/lib/minecraft/log4j2.xml:ro
       - backups:/var/lib/minecraft/backups
       - cache:/var/lib/minecraft/.fabric
       - crash_reports:/var/lib/minecraft/crash-reports
