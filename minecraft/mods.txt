@@ -18,3 +18,4 @@ polydex
 mods-command
 sparsestructures
 cadmus
+stackdeobf
