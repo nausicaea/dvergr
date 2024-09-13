@@ -19,6 +19,9 @@ build:
   stage: build
   tags:
     - saas-linux-small-amd64
+  only:
+    changes:
+      - minecraft/**/*
   variables:
     MINECRAFT_VERSION: 1.20.4
     FABRIC_LOADER_VERSION: 0.16.2
@@ -54,6 +57,8 @@ push_latest:
   stage: push
   only:
     - main
+  needs:
+    - build
   variables:
     GIT_STRATEGY: none
   script:
@@ -65,6 +70,8 @@ push_tagged:
   stage: push
   only:
     - tags
+  needs:
+    - build
   variables:
     GIT_STRATEGY: none
   script:
