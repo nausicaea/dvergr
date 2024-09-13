@@ -56,6 +56,6 @@ RUN set -xe; \
     chown -R minecraft:minecraft /var/lib/minecraft;
 
 VOLUME ["/var/lib/minecraft/.fabric", "/var/lib/minecraft/backups", "/var/lib/minecraft/config", "/var/lib/minecraft/crash-reports", "/var/lib/minecraft/logs", "/var/lib/minecraft/server-config", "/var/lib/minecraft/universe"]
-EXPOSE 30000/tcp 30001/udp
+EXPOSE 30000/tcp 30000/udp 30001/udp 30002/tcp
 USER minecraft:minecraft
 ENTRYPOINT ["/bin/docker-entrypoint"]

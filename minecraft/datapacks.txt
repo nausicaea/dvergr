@@ -1,6 +1,10 @@
+vanilla-refresh
 new-in-town
 new-in-town-dimensions
 william-wythers-overhauled-overworld-(datapack)
 towering-tepuis
 navigable-rivers
 cliffs-and-coves
+mob-heads
+fast-leaf-decay-
+sleep

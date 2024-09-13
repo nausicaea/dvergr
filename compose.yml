@@ -6,8 +6,9 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
-      - 80:80/tcp
       - 25565:25565/tcp
+      - 25565:25565/udp
+      - 25567:25567/tcp
       - 24454:24454/udp
     depends_on:
       - minecraft

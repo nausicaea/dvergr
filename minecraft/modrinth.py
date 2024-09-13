@@ -308,7 +308,7 @@ def main():
     input: Optional[Path] = matches.input
     if input is not None:
         with input.open("r") as i:
-            projects: list[str] = [p for p in i]
+            projects: list[str] = [p.strip() for p in i]
     else:
         projects = matches.projects
 
