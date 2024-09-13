@@ -41,7 +41,8 @@ RUN /bin/modrinth -d -O /artefacts/mods -l fabric \
     vanilla-refresh \
     simple-voice-chat \
     dynamic-lights \
-    mixintrace
+    mixintrace \
+    polyfactory
 RUN /bin/modrinth -d -O /artefacts/datapacks -l datapack \
     new-in-town \
     new-in-town-dimensions \

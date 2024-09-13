@@ -125,7 +125,12 @@ def download_files(files: Any, dest: Path) -> list[Path]:
 
 
 def process_version_by_id(
-    project_id, version_id, dest, modrinth_loader, minecraft_version, modrinth_pat
+    project_id: str,
+    version_id: str,
+    dest: Path,
+    modrinth_loader: str,
+    minecraft_version: str,
+    modrinth_pat: str,
 ) -> list[Path]:
     version = get_version(project_id, version_id, modrinth_pat)
     return process_version(
@@ -134,7 +139,11 @@ def process_version_by_id(
 
 
 def process_dependencies(
-    dependencies: Any, dest: Path, modrinth_loader, minecraft_version, modrinth_pat
+    dependencies: Any,
+    dest: Path,
+    modrinth_loader: str,
+    minecraft_version: str,
+    modrinth_pat: str,
 ) -> list[Path]:
     artifacts = list()
 
@@ -168,7 +177,11 @@ def process_dependencies(
 
 
 def process_version(
-    version, dest: Path, modrinth_loader, minecraft_version, modrinth_pat
+    version: Any,
+    dest: Path,
+    modrinth_loader: str,
+    minecraft_version: str,
+    modrinth_pat: str,
 ) -> list[Path]:
     primary_files = get_primary_files(version)
 
