@@ -17,3 +17,4 @@ anshar-polymer
 polyfactory
 polydex
 mods-command
+sparsestructures
