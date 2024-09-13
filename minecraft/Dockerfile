@@ -37,22 +37,21 @@ RUN set -xe; \
 COPY --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
 COPY --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
 WORKDIR /var/lib/minecraft
-COPY --chmod=0400 eula.txt ./
+COPY --chmod=0400 eula.txt server.properties ./
 COPY --from=builder --chmod=0400 /src/build/libs/otel-0.0.0.jar ./mods/
 COPY --from=downloader --chmod=0400 /artefacts/mods/*.jar ./mods/
 COPY --from=downloader --chmod=0400 /artefacts/datapacks/*.zip ./universe/world/datapacks/
-COPY server-config/ ./server-config/
+COPY player-config/ ./player-config/
 COPY mod-config/ ./config/
 RUN set -xe; \
-    mkdir -p .fabric backups config crash-reports logs server-config universe; \
-    ln -s ./server-config/server.properties server.properties; \
-    ln -s ./server-config/whitelist.json whitelist.json; \
-    ln -s ./server-config/ops.json ops.json; \
-    ln -s ./server-config/banned-ips.json banned-ips.json; \
-    ln -s ./server-config/banned-players.json banned-players.json; \
+    mkdir -p .fabric backups config crash-reports logs player-config universe; \
+    ln -s ./player-config/whitelist.json whitelist.json; \
+    ln -s ./player-config/ops.json ops.json; \
+    ln -s ./player-config/banned-ips.json banned-ips.json; \
+    ln -s ./player-config/banned-players.json banned-players.json; \
     chown -R minecraft:minecraft /var/lib/minecraft;
 
-VOLUME ["/var/lib/minecraft/.fabric", "/var/lib/minecraft/backups", "/var/lib/minecraft/config", "/var/lib/minecraft/crash-reports", "/var/lib/minecraft/logs", "/var/lib/minecraft/server-config", "/var/lib/minecraft/universe"]
+VOLUME ["/var/lib/minecraft/.fabric", "/var/lib/minecraft/backups", "/var/lib/minecraft/config", "/var/lib/minecraft/crash-reports", "/var/lib/minecraft/logs", "/var/lib/minecraft/player-config", "/var/lib/minecraft/universe"]
 EXPOSE 30000/tcp 30000/udp 30001/udp
 USER minecraft:minecraft
 ENTRYPOINT ["/bin/docker-entrypoint"]

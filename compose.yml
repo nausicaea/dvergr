@@ -32,12 +32,13 @@ services:
       JAVA_MAX_MEM: ${JAVA_MAX_MEM}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel_collector:4317
     volumes:
+      - ./server.properties:/var/lib/minecraft/server.properties:ro
       - backups:/var/lib/minecraft/backups
       - cache:/var/lib/minecraft/.fabric
       - crash_reports:/var/lib/minecraft/crash-reports
       - logs:/var/lib/minecraft/logs
       - mod_config:/var/lib/minecraft/config
-      - server_config:/var/lib/minecraft/server-config
+      - player_config:/var/lib/minecraft/player-config
       - universe:/var/lib/minecraft/universe
     depends_on:
       - otel_collector
@@ -142,7 +143,7 @@ volumes:
   crash_reports: {}
   logs: {}
   mod_config: {}
-  server_config: {}
+  player_config: {}
   universe: {}
   tempo: {}
   loki: {}
