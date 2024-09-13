@@ -19,3 +19,7 @@ mods-command
 sparsestructures
 cadmus
 stackdeobf
+server-ui-fix
+tpa++
+architectury-api
+fabric-language-kotlin
