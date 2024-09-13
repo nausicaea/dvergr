@@ -16,3 +16,4 @@ anshar
 anshar-polymer
 polyfactory
 polydex
+mods-command
