@@ -95,22 +95,6 @@ def get_required_dependencies(version: Any) -> Any:
     return filter(lambda f: f["dependency_type"] == "required", version["dependencies"])
 
 
-def read_in_chunks(file_object, chunk_size=1024):
-    while True:
-        data = file_object.read(chunk_size)
-        if data is None:
-            break
-        yield data
-
-
-def sha512_chunked(file: Path, chunk_size=1024) -> str:
-    hasher = hashlib.sha512()
-    with file.open("rb") as f:
-        for chunk in read_in_chunks(f, chunk_size=chunk_size):
-            hasher.update(chunk)
-    return hasher.hexdigest()
-
-
 def sha512(file: Path) -> str:
     return hashlib.sha512(file.open("rb").read()).hexdigest()
 
