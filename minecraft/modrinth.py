@@ -12,7 +12,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Optional
 
 MODRINTH_BASE_URL = "https://api.modrinth.com"
 USER_AGENT = "nausicaea/minecraft/0.1.0 (developer@nausicaea.net)"
@@ -277,7 +277,13 @@ def main():
         help="Specify the destination for downloaded artifacts (default is the current working directory)",
     )
     parser.add_argument(
-        "projects", nargs="+", help="The ID or slug (short name) of a Modrinth project"
+        "-i",
+        "--input",
+        type=Path,
+        help="Specify a file with a list of newline-separated project IDs or slugs (short names)",
+    )
+    parser.add_argument(
+        "projects", nargs="*", help="The ID or slug (short name) of a Modrinth project"
     )
 
     matches = parser.parse_args()
@@ -299,7 +305,17 @@ def main():
     else:
         output: Path = Path.cwd()
 
-    projects: list[str] = matches.projects
+    input: Optional[Path] = matches.input
+    if input is not None:
+        with input.open("r") as i:
+            projects: list[str] = [p for p in i]
+    else:
+        projects = matches.projects
+
+    if len(projects) == 0:
+        raise ValueError(
+            "no projects specified: you must specify projects either from a file via -i/--input or via positional arguments"
+        )
 
     download_project_artifacts(
         minecraft_version, loader, output, projects, api_token=api_token, debug=debug
