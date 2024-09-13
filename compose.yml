@@ -42,6 +42,10 @@ services:
       - mod_config:/var/lib/minecraft/config
       - player_config:/var/lib/minecraft/player-config
       - universe:/var/lib/minecraft/universe
+    expose:
+      - 30000/tcp
+      - 30000/udp
+      - 30001/udp
     depends_on:
       - otel_collector
     mem_limit: ${MINECRAFT_MEM_LIMIT}
@@ -53,6 +57,9 @@ services:
       - --config=/etc/otel-collector.yaml
     volumes:
       - ./otel/otel-collector.yaml:/etc/otel-collector.yaml:ro
+    expose:
+      - 4317/tcp
+      - 8888/tcp
     depends_on:
       - tempo
       - loki
@@ -78,6 +85,8 @@ services:
     volumes:
       - ./tempo/tempo.yaml:/etc/tempo.yaml:ro
       - tempo:/var/tempo
+    expose:
+      - 4317/tcp
     depends_on:
       - tempo_setup
 
@@ -101,6 +110,8 @@ services:
     volumes:
       - ./loki/loki.yaml:/etc/loki.yaml:ro
       - loki:/var/loki
+    expose:
+      - 3100/tcp
     depends_on:
       - loki_setup
 
@@ -115,6 +126,10 @@ services:
     volumes:
       - ./prometheus/prometheus.yaml:/etc/prometheus.yaml:ro
       - prometheus:/prometheus
+    expose:
+      - 9090/tcp
+    ports:
+      - 9090:9090/tcp
     extra_hosts:
       - "host.docker.internal=host-gateway"
 
