@@ -20,9 +20,6 @@ RUN apk add curl jq python3
 ADD --checksum=${FABRIC_LOADER_CHECKSUM} https://meta.fabricmc.net/v2/versions/loader/${MINECRAFT_VERSION}/${FABRIC_LOADER_VERSION}/${FABRIC_INSTALLER_VERSION}/server/jar /artefacts/lib/fabric-launcher.jar
 ADD --checksum=${OTEL_JAVAAGENT_CHECKSUM} https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar /artefacts/lib/opentelemetry-javaagent.jar
 COPY --chmod=0755 modrinth.py /bin/modrinth
-#ENV MODRINTH_PAT=${MODRINTH_PAT}
-#ENV MINECRAFT_VERSION=${MINECRAFT_VERSION}
-#ENTRYPOINT ["/bin/sh"]
 RUN mkdir -p /artefacts/mods /artefacts/datapacks
 RUN --mount=type=bind,target=/tmp/mods.txt,source=./mods.txt /bin/modrinth -d -O /artefacts/mods -l fabric -i /tmp/mods.txt
 RUN --mount=type=bind,target=/tmp/datapacks.txt,source=./datapacks.txt /bin/modrinth -d -O /artefacts/datapacks -l datapack -i /tmp/datapacks.txt
@@ -56,6 +53,6 @@ RUN set -xe; \
     chown -R minecraft:minecraft /var/lib/minecraft;
 
 VOLUME ["/var/lib/minecraft/.fabric", "/var/lib/minecraft/backups", "/var/lib/minecraft/config", "/var/lib/minecraft/crash-reports", "/var/lib/minecraft/logs", "/var/lib/minecraft/server-config", "/var/lib/minecraft/universe"]
-EXPOSE 30000/tcp 30000/udp 30001/udp 30002/tcp
+EXPOSE 30000/tcp 30000/udp 30001/udp
 USER minecraft:minecraft
 ENTRYPOINT ["/bin/docker-entrypoint"]

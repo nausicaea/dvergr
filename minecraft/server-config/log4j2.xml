@@ -2,7 +2,7 @@
 <Configuration>
     <Appenders>
         <Console name="console" target="SYSTEM_ERR">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%level] %msg%n" />
+            <PatternLayout pattern="[%d{DEFAULT}] [%level] [%logger{1}] [%class{1.}] %msg%n" />
         </Console>
         <OpenTelemetry name="OpenTelemetryAppender"/>
     </Appenders>
