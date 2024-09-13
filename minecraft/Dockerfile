@@ -24,32 +24,8 @@ COPY --chmod=0755 modrinth.py /bin/modrinth
 #ENV MINECRAFT_VERSION=${MINECRAFT_VERSION}
 #ENTRYPOINT ["/bin/sh"]
 RUN mkdir -p /artefacts/mods /artefacts/datapacks
-RUN /bin/modrinth -d -O /artefacts/mods -l fabric \
-    advanced-backups \
-    afk-announcer \
-    coord-finder \
-    debugify \
-    ferrite-core \
-    just-mob-heads \
-    krypton \
-    leaves-us-in-peace \
-    lithium \
-    modernfix \
-    noisium \
-    sleep \
-    starlight \
-    vanilla-refresh \
-    simple-voice-chat \
-    dynamic-lights \
-    mixintrace \
-    polyfactory
-RUN /bin/modrinth -d -O /artefacts/datapacks -l datapack \
-    new-in-town \
-    new-in-town-dimensions \
-    'william-wythers-overhauled-overworld-(datapack)' \
-    towering-tepuis \
-    navigable-rivers \
-    cliffs-and-coves
+RUN --mount=type=bind,target=/tmp/mods.txt,source=./mods.txt /bin/modrinth -d -O /artefacts/mods -l fabric -i /tmp/mods.txt
+RUN --mount=type=bind,target=/tmp/datapacks.txt,source=./datapacks.txt /bin/modrinth -d -O /artefacts/datapacks -l datapack -i /tmp/datapacks.txt
 
 FROM docker.io/library/eclipse-temurin:21.0.4_7-jre-alpine
 ARG MINECRAFT_VERSION
