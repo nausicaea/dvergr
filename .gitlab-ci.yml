@@ -3,6 +3,7 @@ stages:
   - push
 
 default:
+  interruptible: false
   image:
     name: docker.io/library/docker:27.2.1
   services:
@@ -19,8 +20,8 @@ build:
   stage: build
   tags:
     - saas-linux-small-amd64
-  only:
-    changes:
+  rules:
+    - changes:
       - minecraft/**/*
   variables:
     MINECRAFT_VERSION: 1.20.4
@@ -55,10 +56,8 @@ build:
 
 push_latest:
   stage: push
-  only:
-    - main
-  needs:
-    - build
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   variables:
     GIT_STRATEGY: none
   script:
@@ -68,10 +67,8 @@ push_latest:
 
 push_tagged:
   stage: push
-  only:
-    - tags
-  needs:
-    - build
+  rules:
+    - if: $CI_COMMIT_TAG
   variables:
     GIT_STRATEGY: none
   script:
