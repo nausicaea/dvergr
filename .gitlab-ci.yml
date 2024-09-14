@@ -41,7 +41,7 @@ build_minecraft_builder:
     - docker pull $CI_REGISTRY_IMAGE:builder || true
     - >
       docker buildx build
-      --push
+      --pull
       --cache-from $CI_REGISTRY_IMAGE:builder
       --cache-to type=inline
       --target builder
@@ -61,6 +61,7 @@ build_minecraft_builder:
       --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
       --tag $CI_REGISTRY_IMAGE:builder
       ./minecraft
+    - docker push $CI_REGISTRY_IMAGE:builder
 
 build_minecraft_downloader:
   stage: build-stage-1
@@ -70,7 +71,7 @@ build_minecraft_downloader:
     - docker pull $CI_REGISTRY_IMAGE:downloader || true
     - >
       docker buildx build
-      --push
+      --pull
       --cache-from $CI_REGISTRY_IMAGE:downloader
       --cache-to type=inline
       --target downloader
@@ -90,6 +91,7 @@ build_minecraft_downloader:
       --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
       --tag $CI_REGISTRY_IMAGE:downloader
       ./minecraft
+    - docker push $CI_REGISTRY_IMAGE:downloader
 
 build_minecraft:
   stage: build-stage-2
@@ -101,7 +103,7 @@ build_minecraft:
     - docker pull $CI_REGISTRY_IMAGE:latest || true
     - >
       docker buildx build
-      --push
+      --pull
       --cache-from $CI_REGISTRY_IMAGE:builder
       --cache-from $CI_REGISTRY_IMAGE:downloader
       --cache-from $CI_REGISTRY_IMAGE:latest
@@ -122,6 +124,7 @@ build_minecraft:
       --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
       --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
       ./minecraft
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
 
 push_minecraft_latest:
   stage: push
