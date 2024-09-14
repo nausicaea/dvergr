@@ -42,7 +42,7 @@ COPY mod-config/ ./config/
 COPY --chmod=0400 eula.txt server.properties log4j2.xml opentelemetry.properties ./
 COPY --from=builder --chmod=0400 /src/build/libs/otel-0.0.0.jar ./mods/
 COPY --from=downloader --chmod=0400 /artefacts/mods/*.jar ./mods/
-COPY --from=downloader --chmod=0400 /artefacts/datapacks/*.zip ./mod-config/paxi/datapacks/
+COPY --from=downloader --chmod=0400 /artefacts/datapacks/*.zip ./config/paxi/datapacks/
 RUN set -xe; \
     mkdir -p .fabric backups config crash-reports logs player-config universe; \
     ln -s ./player-config/whitelist.json whitelist.json; \
