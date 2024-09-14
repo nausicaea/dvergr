@@ -33,18 +33,17 @@ variables:
   OTEL_JAVAAGENT_VERSION: 1.33.5
   OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
 
-build_minecraft:
+build_minecraft_builder:
   stage: build
   tags:
     - saas-linux-small-amd64
   script:
+    - docker pull $CI_REGISTRY_IMAGE:builder || true
     - >
       docker buildx build
-      --pull
       --push
       --cache-from $CI_REGISTRY_IMAGE:builder
-      --cache-from $CI_REGISTRY_IMAGE:downloader
-      --cache-from $CI_REGISTRY_IMAGE:latest
+      --cache-to type=inline
       --target builder
       --platform "$PLATFORM"
       --build-arg BUILDKIT_INLINE_CACHE=1
@@ -63,13 +62,18 @@ build_minecraft:
       --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
       --tag $CI_REGISTRY_IMAGE:builder
       ./minecraft
+
+build_minecraft_downloader:
+  stage: build
+  tags:
+    - saas-linux-small-amd64
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:downloader || true
     - >
       docker buildx build
-      --pull
       --push
-      --cache-from $CI_REGISTRY_IMAGE:builder
       --cache-from $CI_REGISTRY_IMAGE:downloader
-      --cache-from $CI_REGISTRY_IMAGE:latest
+      --cache-to type=inline
       --target downloader
       --platform "$PLATFORM"
       --build-arg BUILDKIT_INLINE_CACHE=1
@@ -88,13 +92,22 @@ build_minecraft:
       --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
       --tag $CI_REGISTRY_IMAGE:downloader
       ./minecraft
+
+build_minecraft:
+  stage: build
+  tags:
+    - saas-linux-small-amd64
+  script:
+    - docker pull $CI_REGISTRY_IMAGE:builder || true
+    - docker pull $CI_REGISTRY_IMAGE:downloader || true
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
     - >
       docker buildx build
-      --pull
       --push
       --cache-from $CI_REGISTRY_IMAGE:builder
       --cache-from $CI_REGISTRY_IMAGE:downloader
       --cache-from $CI_REGISTRY_IMAGE:latest
+      --cache-to type=inline
       --platform "$PLATFORM"
       --build-arg BUILDKIT_INLINE_CACHE=1
       --build-arg "MODRINTH_PAT=$MODRINTH_PAT"
