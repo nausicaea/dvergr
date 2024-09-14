@@ -7,6 +7,7 @@ import json
 import os
 import shutil
 import stat
+import sys
 import tempfile
 import urllib.error
 import urllib.request
@@ -16,6 +17,10 @@ from typing import Any, Iterable, Optional
 
 MODRINTH_BASE_URL = "https://api.modrinth.com"
 USER_AGENT = "nausicaea/minecraft/0.1.0 (developer@nausicaea.net)"
+
+
+class NoCompatibleVersions(Exception):
+    pass
 
 
 class EnvDefault(argparse.Action):
@@ -78,20 +83,20 @@ def get_version(
         )
 
 
-def get_primary_files(version: Any) -> Iterable[Any]:
+def get_primary_files(version: dict[str, Any]) -> Iterable[Any]:
     return filter(lambda f: f["primary"], version["files"])
 
 
-def get_most_recent_version(versions: Any, modrinth_loader: str) -> Any:
+def get_most_recent_version(versions: list[dict[str, Any]]) -> Any:
     return max(
-        filter(lambda v: modrinth_loader in v["loaders"], versions),
+        versions,
         key=lambda v: datetime.strptime(
             v["date_published"].split(".")[0], "%Y-%m-%dT%H:%M:%S"
         ),
     )
 
 
-def get_required_dependencies(version: Any) -> Any:
+def get_required_dependencies(version: dict[str, Any]) -> Any:
     return filter(lambda f: f["dependency_type"] == "required", version["dependencies"])
 
 
@@ -183,17 +188,30 @@ def process_version(
     minecraft_version: str,
     modrinth_pat: str,
 ) -> list[Path]:
+    version_id = version["id"]
+    version_name = version["name"]
+
     primary_files = get_primary_files(version)
 
     artifacts = download_files(primary_files, dest)
 
     dependencies = get_required_dependencies(version)
 
-    artifacts.extend(
-        process_dependencies(
-            dependencies, dest, modrinth_loader, minecraft_version, modrinth_pat
+    try:
+        artifacts.extend(
+            process_dependencies(
+                dependencies, dest, modrinth_loader, minecraft_version, modrinth_pat
+            )
         )
-    )
+    except NoCompatibleVersions:
+        print(
+            f'ignoring dependencies of version {version_id} (name: "{version_name}"): there are no versions compatible with Minecraft {minecraft_version} and the loader {modrinth_loader} (I cannot install dependencies from a different loader)',
+            file=sys.stderr,
+        )
+    except:
+        raise ValueError(
+            f'error processing dependencies of the version {version_id} (name: "{version_name}")'
+        )
 
     return artifacts
 
@@ -208,7 +226,12 @@ def process_project(
     versions = get_project_versions(
         project_id, modrinth_loader, minecraft_version, modrinth_pat
     )
-    most_recent_version = get_most_recent_version(versions, modrinth_loader)
+    loader_versions = list(filter(lambda v: modrinth_loader in v["loaders"], versions))
+    if len(loader_versions) == 0:
+        raise NoCompatibleVersions(
+            f"there are no compatible versions of the project {project_id}"
+        )
+    most_recent_version = get_most_recent_version(loader_versions)
     return process_version(
         most_recent_version, dest, modrinth_loader, minecraft_version, modrinth_pat
     )

@@ -1,5 +1,6 @@
 architectury-api
 fabric-language-kotlin
+more-density-functions
 ferrite-core
 krypton
 lithium
