@@ -1,12 +1,12 @@
 {
-  "displayEnabled": false,
+  "displayEnabled": true,
   "displayUpdateRate": 4,
   "displayCantMine": true,
   "displayModSource": true,
   "displayAdditional": true,
-  "displayMiningProgress": true,
+  "displayMiningProgress": false,
   "displayEntity": true,
-  "displayEntityHealth": true,
+  "displayEntityHealth": false,
   "default_hover_settings": {
     "display_type": "polydex:bossbar",
     "display_mode": "TARGET",
