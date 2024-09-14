@@ -6,6 +6,7 @@ workflow:
   rules:
     - changes:
       - minecraft/**/*
+      - .gitlab-ci.yml
 
 default:
   interruptible: false
