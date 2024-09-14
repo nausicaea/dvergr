@@ -1,7 +1,7 @@
 name: minecraft
 services:
   nginx:
-    image: docker.io/library/nginx:stable-alpine-otel
+    image: docker.io/library/nginx:1.27.1-alpine3.20-otel
     container_name: nginx
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -13,7 +13,7 @@ services:
       - minecraft
 
   minecraft:
-    image: registry.gitlab.com/nausicaea/minecraft:latest
+    image: registry.gitlab.com/nausicaea/minecraft:v0.8.0
     build:
       context: minecraft
       args:
@@ -51,7 +51,7 @@ services:
     mem_limit: ${MINECRAFT_MEM_LIMIT}
 
   otel_collector:
-    image: docker.io/otel/opentelemetry-collector:latest
+    image: docker.io/otel/opentelemetry-collector:0.109.0
     container_name: otel_collector
     command:
       - --config=/etc/otel-collector.yaml
@@ -66,7 +66,7 @@ services:
       - prometheus
 
   tempo_setup:
-    image: &tempo docker.io/grafana/tempo:latest
+    image: &tempo docker.io/grafana/tempo:2.6.0
     container_name: tempo_setup
     user: root
     entrypoint:
@@ -116,7 +116,7 @@ services:
       - loki_setup
 
   prometheus:
-    image: docker.io/prom/prometheus:latest
+    image: docker.io/prom/prometheus:v2.54.1
     container_name: prometheus
     command:
       - --config.file=/etc/prometheus.yaml
@@ -134,7 +134,7 @@ services:
       - "host.docker.internal=host-gateway"
 
   grafana:
-    image: docker.io/grafana/grafana:latest
+    image: docker.io/grafana/grafana:11.2.0
     container_name: grafana
     environment:
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
