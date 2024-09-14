@@ -6,5 +6,4 @@ towering-tepuis
 navigable-rivers
 cliffs-and-coves
 mob-heads
-fast-leaf-decay-
 sleep
