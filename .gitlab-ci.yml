@@ -35,6 +35,7 @@ build_minecraft:
   tags:
     - saas-linux-small-amd64
   script:
+    - docker pull $CI_REGISTRY_IMAGE:builder || docker pull $CI_REGISTRY_IMAGE:downloader || docker pull $CI_REGISTRY_IMAGE:latest || true
     - >
       docker build
       --pull
