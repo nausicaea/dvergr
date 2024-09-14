@@ -51,7 +51,6 @@ RUN set -xe; \
     ln -s ./player-config/banned-players.json banned-players.json; \
     chown -R minecraft:minecraft /var/lib/minecraft;
 
-VOLUME ["/var/lib/minecraft/.fabric", "/var/lib/minecraft/backups", "/var/lib/minecraft/config", "/var/lib/minecraft/crash-reports", "/var/lib/minecraft/logs", "/var/lib/minecraft/player-config", "/var/lib/minecraft/universe"]
 EXPOSE 30000/tcp 30000/udp 30001/udp
 USER minecraft:minecraft
 ENTRYPOINT ["/bin/docker-entrypoint"]
