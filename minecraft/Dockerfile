@@ -39,12 +39,13 @@ COPY --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
 WORKDIR /var/lib/minecraft
 COPY player-config/ ./player-config/
 COPY mod-config/ ./config/
-COPY --chmod=0400 eula.txt server.properties log4j2.xml opentelemetry.properties ./
+COPY --chmod=0400 eula.txt server.properties log4j2.xml opentelemetry.properties ./server-config/
 COPY --from=builder --chmod=0400 /src/build/libs/otel-0.0.0.jar ./mods/
 COPY --from=downloader --chmod=0400 /artefacts/mods/*.jar ./mods/
 COPY --from=downloader --chmod=0400 /artefacts/datapacks/*.zip ./config/paxi/datapacks/
 RUN set -xe; \
-    mkdir -p .fabric backups config crash-reports logs player-config universe; \
+    ln -s ./server-config/eula.txt eula.txt; \
+    ln -s ./server-config/server.properties server.properties; \
     ln -s ./player-config/whitelist.json whitelist.json; \
     ln -s ./player-config/ops.json ops.json; \
     ln -s ./player-config/banned-ips.json banned-ips.json; \
