@@ -46,7 +46,6 @@ build_minecraft_builder:
       --cache-to type=inline
       --target builder
       --platform "$PLATFORM"
-      --build-arg BUILDKIT_INLINE_CACHE=1
       --build-arg "MODRINTH_PAT=$MODRINTH_PAT"
       --build-arg "MINECRAFT_VERSION=$MINECRAFT_VERSION"
       --build-arg "FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION"
@@ -76,7 +75,6 @@ build_minecraft_downloader:
       --cache-to type=inline
       --target downloader
       --platform "$PLATFORM"
-      --build-arg BUILDKIT_INLINE_CACHE=1
       --build-arg "MODRINTH_PAT=$MODRINTH_PAT"
       --build-arg "MINECRAFT_VERSION=$MINECRAFT_VERSION"
       --build-arg "FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION"
@@ -109,7 +107,6 @@ build_minecraft:
       --cache-from $CI_REGISTRY_IMAGE:latest
       --cache-to type=inline
       --platform "$PLATFORM"
-      --build-arg BUILDKIT_INLINE_CACHE=1
       --build-arg "MODRINTH_PAT=$MODRINTH_PAT"
       --build-arg "MINECRAFT_VERSION=$MINECRAFT_VERSION"
       --build-arg "FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION"
