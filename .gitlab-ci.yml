@@ -1,5 +1,6 @@
 stages:
-  - build
+  - build-stage-1
+  - build-stage-2
   - push
 
 workflow:
@@ -34,7 +35,7 @@ variables:
   OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
 
 build_minecraft_builder:
-  stage: build
+  stage: build-stage-1
   tags:
     - saas-linux-small-amd64
   script:
@@ -63,7 +64,7 @@ build_minecraft_builder:
       ./minecraft
 
 build_minecraft_downloader:
-  stage: build
+  stage: build-stage-1
   tags:
     - saas-linux-small-amd64
   script:
@@ -92,7 +93,7 @@ build_minecraft_downloader:
       ./minecraft
 
 build_minecraft:
-  stage: build
+  stage: build-stage-2
   tags:
     - saas-linux-small-amd64
   script:
