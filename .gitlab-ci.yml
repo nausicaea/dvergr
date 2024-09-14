@@ -1,6 +1,7 @@
 stages:
   - build-stage-1
   - build-stage-2
+  - build-stage-3
   - push
 
 workflow:
@@ -24,7 +25,6 @@ variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
   DOCKER_BUILDKIT: true
-  PLATFORM: linux/amd64,linux/arm64
   MINECRAFT_VERSION: 1.20.4
   FABRIC_LOADER_VERSION: 0.16.2
   FABRIC_LOADER_CHECKSUM: sha256:45bf5969b76cc046dcb042375001fd7b6934f6a05c05c20bb53ae6b895c23439
@@ -37,15 +37,20 @@ build_minecraft_builder:
   stage: build-stage-1
   tags:
     - saas-linux-small-amd64
+  parallel:
+    matrix:
+      - ARCH: amd64
+      - ARCH: arm64
   script:
-    - docker pull $CI_REGISTRY_IMAGE:builder || true
+    - docker pull $CI_REGISTRY_IMAGE:builder-$ARCH || true
     - >
-      docker buildx build
+      docker build
       --pull
-      --cache-from $CI_REGISTRY_IMAGE:builder
+      --push
+      --cache-from $CI_REGISTRY_IMAGE:builder-$ARCH
       --cache-to type=inline
       --target builder
-      --platform "$PLATFORM"
+      --platform "linux/$ARCH"
       --build-arg "MODRINTH_PAT=$MODRINTH_PAT"
       --build-arg "MINECRAFT_VERSION=$MINECRAFT_VERSION"
       --build-arg "FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION"
@@ -59,23 +64,27 @@ build_minecraft_builder:
       --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
       --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
       --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
-      --tag $CI_REGISTRY_IMAGE:builder
+      --tag $CI_REGISTRY_IMAGE:builder-$ARCH
       ./minecraft
-    - docker push $CI_REGISTRY_IMAGE:builder
 
 build_minecraft_downloader:
   stage: build-stage-1
   tags:
     - saas-linux-small-amd64
+  parallel:
+    matrix:
+      - ARCH: amd64
+      - ARCH: arm64
   script:
-    - docker pull $CI_REGISTRY_IMAGE:downloader || true
+    - docker pull $CI_REGISTRY_IMAGE:downloader-$ARCH || true
     - >
-      docker buildx build
+      docker build
       --pull
-      --cache-from $CI_REGISTRY_IMAGE:downloader
+      --push
+      --cache-from $CI_REGISTRY_IMAGE:downloader-$ARCH
       --cache-to type=inline
       --target downloader
-      --platform "$PLATFORM"
+      --platform "linux/$ARCH"
       --build-arg "MODRINTH_PAT=$MODRINTH_PAT"
       --build-arg "MINECRAFT_VERSION=$MINECRAFT_VERSION"
       --build-arg "FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION"
@@ -89,26 +98,30 @@ build_minecraft_downloader:
       --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
       --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
       --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
-      --tag $CI_REGISTRY_IMAGE:downloader
+      --tag $CI_REGISTRY_IMAGE:downloader-$ARCH
       ./minecraft
-    - docker push $CI_REGISTRY_IMAGE:downloader
 
 build_minecraft:
   stage: build-stage-2
   tags:
     - saas-linux-small-amd64
+  parallel:
+    matrix:
+      - ARCH: amd64
+      - ARCH: arm64
   script:
-    - docker pull $CI_REGISTRY_IMAGE:builder || true
-    - docker pull $CI_REGISTRY_IMAGE:downloader || true
-    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker pull $CI_REGISTRY_IMAGE:builder-$ARCH || true
+    - docker pull $CI_REGISTRY_IMAGE:downloader-$ARCH || true
+    - docker pull $CI_REGISTRY_IMAGE:latest-$ARCH || true
     - >
-      docker buildx build
+      docker build
       --pull
-      --cache-from $CI_REGISTRY_IMAGE:builder
-      --cache-from $CI_REGISTRY_IMAGE:downloader
-      --cache-from $CI_REGISTRY_IMAGE:latest
+      --push
+      --cache-from $CI_REGISTRY_IMAGE:builder-$ARCH
+      --cache-from $CI_REGISTRY_IMAGE:downloader-$ARCH
+      --cache-from $CI_REGISTRY_IMAGE:latest-$ARCH
       --cache-to type=inline
-      --platform "$PLATFORM"
+      --platform "linux/$ARCH"
       --build-arg "MODRINTH_PAT=$MODRINTH_PAT"
       --build-arg "MINECRAFT_VERSION=$MINECRAFT_VERSION"
       --build-arg "FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION"
@@ -122,9 +135,18 @@ build_minecraft:
       --label "org.opencontainers.image.created=$CI_JOB_STARTED_AT"
       --label "org.opencontainers.image.revision=$CI_COMMIT_SHA"
       --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
-      --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+      --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA-$ARCH
       ./minecraft
-    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+build_minecraft_multiarch:
+  stage: build-stage-3
+  script:
+    - >
+      docker manifest create 
+      $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA 
+      $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA-amd64 
+      $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA-arm64
+    - docker manifest push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
 
 push_minecraft_latest:
   stage: push
