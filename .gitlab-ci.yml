@@ -6,6 +6,8 @@ stages:
 
 workflow:
   rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
     - changes:
       - minecraft/**/*
 
@@ -25,11 +27,11 @@ variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
   DOCKER_BUILDKIT: true
-  MINECRAFT_VERSION: 1.20.4
-  FABRIC_LOADER_VERSION: 0.16.2
+  MINECRAFT_VERSION: "1.21"
+  FABRIC_LOADER_VERSION: 0.16.5
   FABRIC_LOADER_CHECKSUM: sha256:45bf5969b76cc046dcb042375001fd7b6934f6a05c05c20bb53ae6b895c23439
   FABRIC_INSTALLER_VERSION: 1.0.1
-  YARN_MAPPINGS_VERSION: 1.20.4+build.3
+  YARN_MAPPINGS_VERSION: 1.21+build.9
   OTEL_JAVAAGENT_VERSION: 1.33.5
   OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
 
@@ -150,8 +152,6 @@ build_minecraft_multiarch:
 
 push_minecraft_latest:
   stage: push
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   variables:
     GIT_STRATEGY: none
   script:
