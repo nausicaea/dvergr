@@ -20,6 +20,5 @@ luckperms
 simple-voice-chat
 server-ui-fix
 polydex
-sparsestructures
 nullscape
 polyfactory
