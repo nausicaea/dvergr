@@ -4,11 +4,11 @@
   "displayCantMine": true,
   "displayModSource": true,
   "displayAdditional": true,
-  "displayMiningProgress": false,
+  "displayMiningProgress": true,
   "displayEntity": true,
-  "displayEntityHealth": false,
+  "displayEntityHealth": true,
   "default_hover_settings": {
-    "display_type": "polydex:bossbar",
+    "display_type": "polydex:disabled",
     "display_mode": "TARGET",
     "visible_components": {
       "polydex:fuel": "NEVER",
