@@ -11,7 +11,7 @@ ARG OTEL_JAVAAGENT_CHECKSUM
 RUN apk add curl jq python3
 ADD --link --checksum=${FABRIC_LOADER_CHECKSUM} https://meta.fabricmc.net/v2/versions/loader/${MINECRAFT_VERSION}/${FABRIC_LOADER_VERSION}/${FABRIC_INSTALLER_VERSION}/server/jar /artefacts/lib/fabric-launcher.jar
 ADD --link --checksum=${OTEL_JAVAAGENT_CHECKSUM} https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar /artefacts/lib/opentelemetry-javaagent.jar
-COPY --chmod=0755 modrinth.py /bin/modrinth
+COPY --link --chmod=0755 modrinth.py /bin/modrinth
 RUN mkdir -p /artefacts/mods /artefacts/datapacks
 RUN --mount=type=bind,target=/tmp/mods.txt,source=./mods.txt /bin/modrinth -d -O /artefacts/mods -l fabric -i /tmp/mods.txt
 RUN --mount=type=bind,target=/tmp/datapacks.txt,source=./datapacks.txt /bin/modrinth -d -O /artefacts/datapacks -l datapack -i /tmp/datapacks.txt
@@ -21,7 +21,7 @@ ARG MINECRAFT_VERSION
 ARG YARN_MAPPINGS_VERSION
 ARG FABRIC_LOADER_VERSION
 WORKDIR /src
-COPY otel-mod /src
+COPY --link otel-mod /src
 RUN --mount=type=cache,target=/src/.gradle gradle --no-daemon :assemble
 
 FROM docker.io/library/eclipse-temurin:21.0.4_7-jre-alpine
@@ -34,15 +34,15 @@ ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 RUN set -xe; \
     addgroup -S -g 101 minecraft; \
     adduser -S -u 101 -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft
-COPY --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
-COPY --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
+COPY --link --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
+COPY --link --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
 WORKDIR /var/lib/minecraft
-COPY player-config/ ./player-config/
-COPY mod-config/ ./config/
-COPY --chmod=0400 eula.txt server.properties log4j2.xml opentelemetry.properties ./server-config/
-COPY --from=builder --chmod=0400 /src/build/libs/otel-0.0.0.jar ./mods/
-COPY --from=downloader --chmod=0400 /artefacts/mods/*.jar ./mods/
-COPY --from=downloader --chmod=0400 /artefacts/datapacks/*.zip ./config/paxi/datapacks/
+COPY --link player-config/ ./player-config/
+COPY --link mod-config/ ./config/
+COPY --link --chmod=0400 eula.txt server.properties log4j2.xml opentelemetry.properties ./server-config/
+COPY --link --from=builder --chmod=0400 /src/build/libs/otel-0.0.0.jar ./mods/
+COPY --link --from=downloader --chmod=0400 /artefacts/mods/*.jar ./mods/
+COPY --link --from=downloader --chmod=0400 /artefacts/datapacks/*.zip ./config/paxi/datapacks/
 RUN set -xe; \
     ln -s ./server-config/eula.txt eula.txt; \
     ln -s ./server-config/server.properties server.properties; \

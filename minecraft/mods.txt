@@ -6,7 +6,6 @@ krypton
 lithium
 noisium
 c2me-fabric
-starlight
 paxi
 dynamic-lights
 advanced-backups
@@ -15,15 +14,12 @@ stackdeobf
 modernfix
 afk-announcer
 coord-finder
-mods-command
-tpa++
-cadmus
+mod-viewer
+goml-reserved
 luckperms
 simple-voice-chat
 server-ui-fix
 polydex
 sparsestructures
 nullscape
-anshar
-anshar-polymer
 polyfactory
