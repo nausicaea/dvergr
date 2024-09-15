@@ -28,7 +28,7 @@ JAVA_OPTS=" \
     -Xmx${JAVA_MAX_MEM:-4G} \
     ${AIKAR_FLAGS} \
     -Dlog4j.configurationFile=/var/lib/minecraft/server-config/log4j2.xml \
-    -Dotel.javaagent.configuration-file=/var/lib/minecraft/sercer-config/opentelemetry.properties \
+    -Dotel.javaagent.configuration-file=/var/lib/minecraft/server-config/opentelemetry.properties \
     -javaagent:/usr/local/lib/opentelemetry-javaagent.jar \
 "
 
