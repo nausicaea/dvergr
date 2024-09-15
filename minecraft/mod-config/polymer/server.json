@@ -15,6 +15,5 @@
   "force_strict_block_updates": false,
   "_c4": "Enables experimental passing of ItemStack context through nbt, allowing for better mod compat",
   "item_stack_nbt_hack": true,
-  "override_polymc_mining_check": false,
-  "always_remove_polymer_block_entities": false
+  "override_polymc_mining_check": false
 }

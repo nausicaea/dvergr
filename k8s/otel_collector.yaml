@@ -30,7 +30,7 @@ spec:
               containerPort: 8888
       volumes:
         - name: otelcol-config
-          configMap: 
+          configMap:
             name: opentelemetry-collector
             items:
               - key: config.yaml
@@ -102,4 +102,3 @@ data:
           receivers: [otlp]
           processors: [batch]
           exporters: [otlphttp/logs]
-
