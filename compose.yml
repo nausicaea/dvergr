@@ -13,7 +13,7 @@ services:
       - minecraft
 
   minecraft:
-    image: registry.gitlab.com/nausicaea/minecraft:v0.8.0
+    image: registry.gitlab.com/nausicaea/minecraft:latest
     container_name: minecraft
     environment:
       MINECRAFT_SERVER_ID: nausicaea
