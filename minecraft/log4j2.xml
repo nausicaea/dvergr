@@ -7,8 +7,8 @@
         <OpenTelemetry name="OpenTelemetryAppender"/>
     </Appenders>
     <Loggers>
-        <Root level="info">
-            <AppenderRef ref="console" level="All"/>
+        <Root level="debug">
+            <AppenderRef ref="console" level="warn"/>
             <AppenderRef ref="OpenTelemetryAppender" level="All"/>
         </Root>
     </Loggers>
