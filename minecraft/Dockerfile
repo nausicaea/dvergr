@@ -37,20 +37,23 @@ RUN set -xe; \
 COPY --link --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
 COPY --link --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
 WORKDIR /var/lib/minecraft
-COPY --link player-config/ ./player-config/
-COPY --link mod-config/ ./config/
-COPY --link --chmod=0400 eula.txt server.properties log4j2.xml opentelemetry.properties ./server-config/
-COPY --link --from=builder --chmod=0400 /src/build/libs/otel-0.0.0.jar ./mods/
-COPY --link --from=downloader --chmod=0400 /artefacts/mods/*.jar ./mods/
-COPY --link --from=downloader --chmod=0400 /artefacts/datapacks/*.zip ./config/paxi/datapacks/
-RUN set -xe; \
-    ln -s ./server-config/eula.txt eula.txt; \
-    ln -s ./server-config/server.properties server.properties; \
-    ln -s ./player-config/whitelist.json whitelist.json; \
-    ln -s ./player-config/ops.json ops.json; \
-    ln -s ./player-config/banned-ips.json banned-ips.json; \
-    ln -s ./player-config/banned-players.json banned-players.json; \
-    chown -R minecraft:minecraft /var/lib/minecraft;
+COPY --link --chown=101:101 player-config/ ./player-config/
+COPY --link --chown=101:101 mod-config/ ./config/
+COPY --link --chown=101:101 --chmod=0400 eula.txt server.properties log4j2.xml opentelemetry.properties ./server-config/
+COPY --link --from=builder --chown=101:101 --chmod=0400 /src/build/libs/otel-0.0.0.jar ./mods/
+COPY --link --from=downloader --chown=101:101 --chmod=0400 /artefacts/mods/*.jar ./mods/
+COPY --link --from=downloader --chown=101:101 --chmod=0400 /artefacts/datapacks/*.zip ./config/paxi/datapacks/
+RUN <<-EOC
+    set -xe;
+    ln -s ./server-config/eula.txt eula.txt;
+    ln -s ./server-config/server.properties server.properties;
+    ln -s ./player-config/whitelist.json whitelist.json;
+    ln -s ./player-config/ops.json ops.json;
+    ln -s ./player-config/banned-ips.json banned-ips.json;
+    ln -s ./player-config/banned-players.json banned-players.json;
+    mkdir -p .cache .fabric backups crash-reports libraries logs mods/luckperms polymer stackdeobf_mappings universe versions;
+    chown 101:101 .cache .fabric backups crash-reports libraries logs mods/luckperms polymer stackdeobf_mappings universe versions;
+EOC
 
 EXPOSE 30000/tcp 30000/udp 30001/udp
 USER minecraft:minecraft

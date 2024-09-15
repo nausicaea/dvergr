@@ -14,6 +14,17 @@ services:
 
   minecraft:
     image: registry.gitlab.com/nausicaea/minecraft:latest
+    build:
+      context: minecraft
+      args:
+        MODRINTH_PAT: $MODRINTH_PAT
+        MINECRAFT_VERSION: "1.21"
+        FABRIC_LOADER_VERSION: 0.16.5
+        FABRIC_LOADER_CHECKSUM: sha256:ccf2b6e4432805d5676e8f6634377a58e3642a6fdd3df0afa8cab8498c77ae85
+        FABRIC_INSTALLER_VERSION: 1.0.1
+        YARN_MAPPINGS_VERSION: 1.21+build.9
+        OTEL_JAVAAGENT_VERSION: 1.33.5
+        OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
     container_name: minecraft
     environment:
       MINECRAFT_SERVER_ID: nausicaea
@@ -21,9 +32,9 @@ services:
       JAVA_MAX_MEM: ${JAVA_MAX_MEM}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel_collector:4317
     volumes:
-      - ./minecraft/server.properties:/var/lib/minecraft/server.properties:ro
-      - ./minecraft/opentelemetry.properties:/var/lib/minecraft/opentelemetry.properties:ro
-      - ./minecraft/log4j2.xml:/var/lib/minecraft/log4j2.xml:ro
+      - ./minecraft/server.properties:/var/lib/minecraft/server-config/server.properties:ro
+      - ./minecraft/opentelemetry.properties:/var/lib/minecraft/server-config/opentelemetry.properties:ro
+      - ./minecraft/log4j2.xml:/var/lib/minecraft/server-config/log4j2.xml:ro
       - backups:/var/lib/minecraft/backups
       - cache:/var/lib/minecraft/.fabric
       - crash_reports:/var/lib/minecraft/crash-reports
