@@ -12,7 +12,7 @@ advanced-backups
 mixintrace
 stackdeobf
 modernfix
-afk-announcer
+sessility
 coord-finder
 mod-viewer
 goml-reserved
