@@ -15,10 +15,9 @@
 	"icon": "assets/otel/icon.png",
 	"environment": "server",
 	"entrypoints": {
-		"main": [
+		"preLaunch": [
           "net.nausicaea.otel.Otel"
-		],
-		"client": []
+		]
 	},
 	"mixins": [
 		"otel.mixins.json"

@@ -32,18 +32,18 @@ ENV JAVA_MAX_MEM=2G
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 
 RUN set -xe; \
-    addgroup -S -g 101 minecraft; \
-    adduser -S -u 101 -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft
+    addgroup -S -g 10001 minecraft; \
+    adduser -S -u 10001 -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft
 COPY --link --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
 COPY --link --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
 WORKDIR /var/lib/minecraft
-COPY --link --chown=101:101 player-config/ ./player-config/
-COPY --link --chown=101:101 mod-config/ ./config/
-COPY --link --chown=101:101 --chmod=0400 server-icon.png ./
-COPY --link --chown=101:101 --chmod=0400 eula.txt server.properties log4j2.xml opentelemetry.properties ./server-config/
-COPY --link --from=builder --chown=101:101 --chmod=0400 /src/build/libs/otel-0.0.0.jar ./mods/
-COPY --link --from=downloader --chown=101:101 --chmod=0400 /artefacts/mods/*.jar ./mods/
-COPY --link --from=downloader --chown=101:101 --chmod=0400 /artefacts/datapacks/*.zip ./config/paxi/datapacks/
+COPY --link --chown=10001:10001 player-config/ ./player-config/
+COPY --link --chown=10001:10001 mod-config/ ./config/
+COPY --link --chown=10001:10001 --chmod=0400 server-icon.png ./
+COPY --link --chown=10001:10001 --chmod=0400 eula.txt server.properties log4j2.xml opentelemetry.properties ./server-config/
+COPY --link --from=builder --chown=10001:10001 --chmod=0400 /src/build/libs/otel-0.0.0.jar ./mods/
+COPY --link --from=downloader --chown=10001:10001 --chmod=0400 /artefacts/mods/*.jar ./mods/
+COPY --link --from=downloader --chown=10001:10001 --chmod=0400 /artefacts/datapacks/*.zip ./config/paxi/datapacks/
 RUN <<-EOC
     set -xe;
     ln -s ./server-config/eula.txt eula.txt;
@@ -53,7 +53,7 @@ RUN <<-EOC
     ln -s ./player-config/banned-ips.json banned-ips.json;
     ln -s ./player-config/banned-players.json banned-players.json;
     mkdir -p .cache .fabric backups crash-reports libraries logs mods/luckperms polymer stackdeobf_mappings universe versions;
-    chown 101:101 .cache .fabric backups crash-reports libraries logs mods/luckperms polymer stackdeobf_mappings universe versions;
+    chown 10001:10001 .cache .fabric backups crash-reports libraries logs mods/luckperms polymer stackdeobf_mappings universe versions;
 EOC
 
 EXPOSE 30000/tcp 30000/udp 30001/udp
