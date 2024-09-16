@@ -39,6 +39,7 @@ COPY --link --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
 WORKDIR /var/lib/minecraft
 COPY --link --chown=101:101 player-config/ ./player-config/
 COPY --link --chown=101:101 mod-config/ ./config/
+COPY --link --chown=101:101 --chmod=0400 server-icon.png ./
 COPY --link --chown=101:101 --chmod=0400 eula.txt server.properties log4j2.xml opentelemetry.properties ./server-config/
 COPY --link --from=builder --chown=101:101 --chmod=0400 /src/build/libs/otel-0.0.0.jar ./mods/
 COPY --link --from=downloader --chown=101:101 --chmod=0400 /artefacts/mods/*.jar ./mods/
