@@ -1,4 +1,3 @@
-vanilla-refresh
 mob-heads
 sleep
 larion-worldgen
