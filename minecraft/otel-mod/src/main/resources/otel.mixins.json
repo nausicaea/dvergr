@@ -1,6 +1,6 @@
 {
 	"required": false,
-	"package": "net.nausicaea.otel",
+	"package": "net.nausicaea.otel.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [],
 	"injectors": {
