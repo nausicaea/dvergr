@@ -17,6 +17,7 @@ coord-finder
 mod-viewer
 goml-reserved
 luckperms
+tpa
 simple-voice-chat
 server-ui-fix
 polydex
