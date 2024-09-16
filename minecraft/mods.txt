@@ -13,6 +13,7 @@ mixintrace
 stackdeobf
 modernfix
 sessility
+fabric-tps
 coord-finder
 mod-viewer
 goml-reserved
