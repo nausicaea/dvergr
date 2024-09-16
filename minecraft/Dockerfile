@@ -35,6 +35,7 @@ RUN set -xe; \
     addgroup -S -g 10001 minecraft; \
     adduser -S -u 10001 -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft
 COPY --link --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
+COPY --link --chmod=0755 healthcheck.sh /bin/healthcheck
 COPY --link --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
 WORKDIR /var/lib/minecraft
 COPY --link --chown=10001:10001 player-config/ ./player-config/

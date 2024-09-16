@@ -26,6 +26,13 @@ services:
         OTEL_JAVAAGENT_VERSION: 1.33.5
         OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
     container_name: minecraft
+    healthcheck:
+      test: ['CMD', '/bin/healthcheck']
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 2m
+      start_interval: 5s
     environment:
       MINECRAFT_SERVER_ID: nausicaea
       JAVA_INITIAL_MEM: 256M
