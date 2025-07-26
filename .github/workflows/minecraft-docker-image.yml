@@ -23,5 +23,4 @@ jobs:
         --build-arg "YARN_MAPPINGS_VERSION=1.21+build.9"
         --build-arg "OTEL_JAVAAGENT_VERSION=1.33.5"
         --build-arg "OTEL_JAVAAGENT_CHECKSUM=sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce"
-        --file Dockerfile 
         --tag nausicaea/minecraft:$(date +%s)
