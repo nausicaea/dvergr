@@ -18,6 +18,7 @@ coord-finder
 mod-viewer
 goml-reserved
 luckperms
+larion-worldgen
 tpa
 simple-voice-chat
 server-ui-fix

@@ -1,6 +1,5 @@
 mob-heads
 sleep
-larion-worldgen
 william-wythers-overhauled-overworld-(datapack)
 towering-tepuis
 cliffs-and-coves
