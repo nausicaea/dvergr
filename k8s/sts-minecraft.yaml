@@ -59,7 +59,7 @@ spec:
                 path: log4j2.xml
       containers:
         - name: main
-          image: ghcr.com/nausicaea/minecraft:latest
+          image: ghcr.io/nausicaea/minecraft:main
           envFrom:
             - configMapRef:
                 name: minecraft-environment

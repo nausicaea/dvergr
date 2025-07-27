@@ -10,6 +10,7 @@ spec:
   selector:
     app: minecraft
   type: LoadBalancer
+  loadBalancerClass: tailscale
   ports:
     - name: minecraft
       port: 30000

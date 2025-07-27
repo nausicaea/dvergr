@@ -1,7 +1,7 @@
 name: minecraft
 services:
   minecraft:
-    image: registry.gitlab.com/nausicaea/minecraft:latest
+    image: ghcr.io/nausicaea/minecraft:main
     build:
       context: minecraft
       args:
