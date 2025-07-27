@@ -36,13 +36,14 @@ class EnvDefault(argparse.Action):
         setattr(namespace, self.dest, values)
 
 
-def get_modrinth_request(url: str, modrinth_pat: str) -> Any:
+def get_modrinth_request(url: str, modrinth_api_token: Optional[str]) -> Any:
+    headers = {"User-Agent": USER_AGENT}
+    if modrinth_api_token is not None:
+        headers["Authorization"] = modrinth_api_token
+
     req = urllib.request.Request(
         url,
-        headers={
-            "Authorization": modrinth_pat,
-            "User-Agent": USER_AGENT,
-        },
+        headers=headers,
     )
     try:
         with urllib.request.urlopen(req) as resp:
@@ -60,11 +61,14 @@ def get_modrinth_request(url: str, modrinth_pat: str) -> Any:
 
 
 def get_project_versions(
-    project_id: str, modrinth_loader: str, minecraft_version: str, modrinth_pat: str
+    project_id: str,
+    modrinth_loader: str,
+    minecraft_version: str,
+    modrinth_api_token: Optional[str],
 ) -> Any:
     url = f"{MODRINTH_BASE_URL}/v2/project/{project_id}/version?loaders=%5B%22{modrinth_loader}%22%5D&game_versions=%5B%22{minecraft_version}%22%5D"
     try:
-        return get_modrinth_request(url, modrinth_pat)
+        return get_modrinth_request(url, modrinth_api_token)
     except ValueError:
         raise ValueError(f'Error obtaining versions for the project "{project_id}"')
 
@@ -72,11 +76,11 @@ def get_project_versions(
 def get_version(
     project_id: str,
     version_id: str,
-    modrinth_pat: str,
+    modrinth_api_token: Optional[str],
 ) -> Any:
     url = f"{MODRINTH_BASE_URL}/v2/project/{project_id}/version/{version_id}"
     try:
-        return get_modrinth_request(url, modrinth_pat)
+        return get_modrinth_request(url, modrinth_api_token)
     except ValueError:
         raise ValueError(
             f'Error obtaining version "{version_id}" from project "{project_id}"'
@@ -135,11 +139,11 @@ def process_version_by_id(
     dest: Path,
     modrinth_loader: str,
     minecraft_version: str,
-    modrinth_pat: str,
+    modrinth_api_token: Optional[str],
 ) -> list[Path]:
-    version = get_version(project_id, version_id, modrinth_pat)
+    version = get_version(project_id, version_id, modrinth_api_token)
     return process_version(
-        version, dest, modrinth_loader, minecraft_version, modrinth_pat
+        version, dest, modrinth_loader, minecraft_version, modrinth_api_token
     )
 
 
@@ -148,7 +152,7 @@ def process_dependencies(
     dest: Path,
     modrinth_loader: str,
     minecraft_version: str,
-    modrinth_pat: str,
+    modrinth_api_token: Optional[str],
 ) -> list[Path]:
     artifacts = list()
 
@@ -164,7 +168,7 @@ def process_dependencies(
                         dest,
                         modrinth_loader,
                         minecraft_version,
-                        modrinth_pat,
+                        modrinth_api_token,
                     )
                 )
             else:
@@ -174,7 +178,7 @@ def process_dependencies(
                         dest,
                         modrinth_loader,
                         minecraft_version,
-                        modrinth_pat,
+                        modrinth_api_token,
                     )
                 )
 
@@ -186,7 +190,7 @@ def process_version(
     dest: Path,
     modrinth_loader: str,
     minecraft_version: str,
-    modrinth_pat: str,
+    modrinth_api_token: Optional[str],
 ) -> list[Path]:
     version_id = version["id"]
     version_name = version["name"]
@@ -200,7 +204,11 @@ def process_version(
     try:
         artifacts.extend(
             process_dependencies(
-                dependencies, dest, modrinth_loader, minecraft_version, modrinth_pat
+                dependencies,
+                dest,
+                modrinth_loader,
+                minecraft_version,
+                modrinth_api_token,
             )
         )
     except NoCompatibleVersions:
@@ -221,10 +229,10 @@ def process_project(
     dest: Path,
     modrinth_loader: str,
     minecraft_version: str,
-    modrinth_pat: str,
+    modrinth_api_token: Optional[str],
 ) -> list[Path]:
     versions = get_project_versions(
-        project_id, modrinth_loader, minecraft_version, modrinth_pat
+        project_id, modrinth_loader, minecraft_version, modrinth_api_token
     )
     loader_versions = list(filter(lambda v: modrinth_loader in v["loaders"], versions))
     if len(loader_versions) == 0:
@@ -233,7 +241,11 @@ def process_project(
         )
     most_recent_version = get_most_recent_version(loader_versions)
     return process_version(
-        most_recent_version, dest, modrinth_loader, minecraft_version, modrinth_pat
+        most_recent_version,
+        dest,
+        modrinth_loader,
+        minecraft_version,
+        modrinth_api_token,
     )
 
 
@@ -242,8 +254,7 @@ def download_project_artifacts(
     loader: str,
     output: Path,
     projects: list[str],
-    api_token: str,
-    debug: bool = False,
+    modrinth_api_token: Optional[str],
 ):
     # Change to a temporary directory
     with tempfile.TemporaryDirectory() as temp:
@@ -253,7 +264,9 @@ def download_project_artifacts(
         artifacts: list[Path] = list()
         for project in projects:
             artifacts.extend(
-                process_project(project, temp_dest, loader, mc_version, api_token)
+                process_project(
+                    project, temp_dest, loader, mc_version, modrinth_api_token
+                )
             )
 
         # Copy the artifacts into the destination directory
@@ -271,20 +284,10 @@ def main():
         description="Provides read-only access to Minecraft mods, datapacks, and plugins via Modrinth"
     )
     parser.add_argument(
-        "-d", "--debug", action="store_true", help="Enable debugging output"
-    )
-    parser.add_argument(
         "-l",
         "--loader",
         default="fabric",
         help="Specify the required loader (ex. fabric, datapack, etc.)",
-    )
-    parser.add_argument(
-        "-t",
-        "--api-token",
-        action=EnvDefault,
-        envvar="MODRINTH_PAT",
-        help='Specify the Modrinth authentication token (default from environment variable "MODRINTH_PAT")',
     )
     parser.add_argument(
         "-V",
@@ -310,14 +313,9 @@ def main():
     )
 
     matches = parser.parse_args()
-    debug: bool = matches.debug
     loader: str = matches.loader
 
-    if matches.api_token is None or len(matches.api_token) == 0:
-        raise ValueError(
-            'missing Modrinth personal authentication token (variable "MODRINTH_PAT")'
-        )
-    api_token: str = matches.api_token
+    modrinth_api_token: Optional[str] = os.environ.get("MODRINTH_PAT")
 
     if matches.minecraft_version is None or len(matches.minecraft_version) == 0:
         raise ValueError('missing Minecraft version (variable "MINECRAFT_VERSION")')
@@ -341,7 +339,11 @@ def main():
         )
 
     download_project_artifacts(
-        minecraft_version, loader, output, projects, api_token=api_token, debug=debug
+        minecraft_version,
+        loader,
+        output,
+        projects,
+        modrinth_api_token=modrinth_api_token,
     )
 
 

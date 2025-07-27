@@ -1,9 +1,11 @@
 {
-	"required": false,
+	"required": true,
 	"package": "net.nausicaea.otel.mixin",
 	"compatibilityLevel": "JAVA_21",
-	"mixins": [],
+	"mixins": [
+        "OtelMixin"
+    ],
 	"injectors": {
-		"defaultRequire": 0
+		"defaultRequire": 1
 	}
 }

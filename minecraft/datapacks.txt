@@ -1,8 +1,8 @@
-mob-heads
 sleep
 william-wythers-overhauled-overworld-(datapack)
 towering-tepuis
 cliffs-and-coves
 navigable-rivers
+vegan-recipes
 new-in-town
-the-bracken-pack
+new-in-town-dimensions

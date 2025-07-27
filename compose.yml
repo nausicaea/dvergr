@@ -1,28 +1,15 @@
 name: minecraft
 services:
-  nginx:
-    image: docker.io/library/nginx:1.27.1-alpine3.20-otel
-    container_name: nginx
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    ports:
-      - 25565:25565/tcp
-      - 25565:25565/udp
-      - 24454:24454/udp
-    depends_on:
-      - minecraft
-
   minecraft:
     image: registry.gitlab.com/nausicaea/minecraft:latest
     build:
       context: minecraft
       args:
-        MODRINTH_PAT: $MODRINTH_PAT
-        MINECRAFT_VERSION: "1.21"
+        MINECRAFT_VERSION: "1.21.1"
         FABRIC_LOADER_VERSION: 0.16.5
-        FABRIC_LOADER_CHECKSUM: sha256:ccf2b6e4432805d5676e8f6634377a58e3642a6fdd3df0afa8cab8498c77ae85
+        FABRIC_LOADER_CHECKSUM: sha256:243ac92e0ddb12b031218d46d71f211d99d4d61a73fb2538bf73beee1ab37556
         FABRIC_INSTALLER_VERSION: 1.0.1
-        YARN_MAPPINGS_VERSION: 1.21+build.9
+        YARN_MAPPINGS_VERSION: 1.21.1+build.3
         OTEL_JAVAAGENT_VERSION: 1.33.5
         OTEL_JAVAAGENT_CHECKSUM: sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
     container_name: minecraft
@@ -53,113 +40,7 @@ services:
       - 30000/tcp
       - 30000/udp
       - 30001/udp
-    depends_on:
-      - otel_collector
     mem_limit: ${MINECRAFT_MEM_LIMIT}
-
-  otel_collector:
-    image: docker.io/otel/opentelemetry-collector:0.109.0
-    container_name: otel_collector
-    command:
-      - --config=/etc/otel-collector.yaml
-    volumes:
-      - ./otel/otel-collector.yaml:/etc/otel-collector.yaml:ro
-    expose:
-      - 4317/tcp
-      - 8888/tcp
-    depends_on:
-      - tempo
-      - loki
-      - prometheus
-
-  tempo_setup:
-    image: &tempo docker.io/grafana/tempo:2.6.0
-    container_name: tempo_setup
-    user: root
-    entrypoint:
-      - chown
-      - "-R"
-      - "10001:10001"
-      - /var/tempo
-    volumes:
-      - tempo:/var/tempo
-
-  tempo:
-    image: *tempo
-    container_name: tempo
-    command:
-      - --config.file=/etc/tempo.yaml
-    volumes:
-      - ./tempo/tempo.yaml:/etc/tempo.yaml:ro
-      - tempo:/var/tempo
-    expose:
-      - 4317/tcp
-    depends_on:
-      - tempo_setup
-
-  loki_setup:
-    image: &loki docker.io/grafana/loki:3.1.1
-    container_name: loki_setup
-    user: root
-    entrypoint:
-      - chown
-      - "-R"
-      - "10001:10001"
-      - /var/loki
-    volumes:
-      - loki:/var/loki
-
-  loki:
-    image: *loki
-    container_name: loki
-    command:
-      - --config.file=/etc/loki.yaml
-    volumes:
-      - ./loki/loki.yaml:/etc/loki.yaml:ro
-      - loki:/var/loki
-    expose:
-      - 3100/tcp
-    depends_on:
-      - loki_setup
-
-  prometheus:
-    image: docker.io/prom/prometheus:v2.54.1
-    container_name: prometheus
-    command:
-      - --config.file=/etc/prometheus.yaml
-      - --web.enable-remote-write-receiver
-      - --enable-feature=exemplar-storage
-      - --enable-feature=native-histograms
-    volumes:
-      - ./prometheus/prometheus.yaml:/etc/prometheus.yaml:ro
-      - prometheus:/prometheus
-    expose:
-      - 9090/tcp
-    ports:
-      - 9090:9090/tcp
-    extra_hosts:
-      - "host.docker.internal=host-gateway"
-
-  grafana:
-    image: docker.io/grafana/grafana:11.2.0
-    container_name: grafana
-    environment:
-      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
-      GF_AUTH_ANONYMOUS_ENABLED: true
-      GF_AUTH_DISABLE_LOGIN_FORM: true
-      GF_AUTH_BASIC_ENABLED: false
-      GF_FEATURE_TOGGLES_ENABLE: accessControlOnCall,traceqlEditor
-      GF_INSTALL_PLUGINS: https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/grafana-lokiexplore-app-latest.zip;grafana-lokiexplore-app
-    volumes:
-      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
-      - grafana:/var/lib/grafana
-    ports:
-      - 3000:3000/tcp
-    depends_on:
-      - loki
-      - tempo
-      - prometheus
 
 volumes:
   backups: {}
@@ -169,7 +50,3 @@ volumes:
   mod_config: {}
   player_config: {}
   universe: {}
-  tempo: {}
-  loki: {}
-  prometheus: {}
-  grafana: {}

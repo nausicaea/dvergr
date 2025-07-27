@@ -12,12 +12,6 @@ public class Otel implements PreLaunchEntrypoint {
 
 	@Override
 	public void onPreLaunch() {
-		LOGGER.info("Obtain a reference to the global OpenTelemetry object (managed by the Java agent)");
-		OpenTelemetry otel = GlobalOpenTelemetry.get();
-
-		LOGGER.info("Install the OpenTelemetry appender in Log4j");
-		OpenTelemetryAppender.install(otel);
-
 		LOGGER.info("OpenTelemetry logging instrumentation is loaded");
 	}
 }

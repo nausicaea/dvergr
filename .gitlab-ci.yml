@@ -26,6 +26,7 @@ variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
   DOCKER_BUILDKIT: true
+  DOCKER_CONTENT_TRUST: true
   MINECRAFT_VERSION: "1.21"
   FABRIC_LOADER_VERSION: 0.16.5
   FABRIC_LOADER_CHECKSUM: sha256:ccf2b6e4432805d5676e8f6634377a58e3642a6fdd3df0afa8cab8498c77ae85
@@ -52,7 +53,6 @@ build_minecraft_builder:
       --cache-to type=inline
       --target builder
       --platform "linux/$ARCH"
-      --build-arg "MODRINTH_PAT=$MODRINTH_PAT"
       --build-arg "MINECRAFT_VERSION=$MINECRAFT_VERSION"
       --build-arg "FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION"
       --build-arg "FABRIC_LOADER_CHECKSUM=$FABRIC_LOADER_CHECKSUM"
@@ -86,7 +86,6 @@ build_minecraft_downloader:
       --cache-to type=inline
       --target downloader
       --platform "linux/$ARCH"
-      --build-arg "MODRINTH_PAT=$MODRINTH_PAT"
       --build-arg "MINECRAFT_VERSION=$MINECRAFT_VERSION"
       --build-arg "FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION"
       --build-arg "FABRIC_LOADER_CHECKSUM=$FABRIC_LOADER_CHECKSUM"
@@ -123,7 +122,6 @@ build_minecraft:
       --cache-from $CI_REGISTRY_IMAGE:latest-$ARCH
       --cache-to type=inline
       --platform "linux/$ARCH"
-      --build-arg "MODRINTH_PAT=$MODRINTH_PAT"
       --build-arg "MINECRAFT_VERSION=$MINECRAFT_VERSION"
       --build-arg "FABRIC_LOADER_VERSION=$FABRIC_LOADER_VERSION"
       --build-arg "FABRIC_LOADER_CHECKSUM=$FABRIC_LOADER_CHECKSUM"
@@ -138,6 +136,18 @@ build_minecraft:
       --label "org.opencontainers.image.version=$CI_COMMIT_REF_NAME"
       --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA-$ARCH
       ./minecraft
+
+push_minecraft:
+  stage: push
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - >
+      docker manifest create
+      $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+      $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA-amd64
+      $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA-arm64
+    - docker manifest push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
 
 push_minecraft:
   stage: push
