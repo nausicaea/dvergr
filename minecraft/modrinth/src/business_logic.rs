@@ -43,10 +43,11 @@ async fn download_primary_files(
     version_number: &str,
     artefacts: &[&ModrinthFile],
     dest: &Path,
+    no_download: bool,
 ) -> Result<Vec<(PathBuf, Artefact)>> {
     let mut lock_data = Vec::new();
     for artefact in artefacts {
-        let artefact_info = download_file(client, project_id, project_slug, version_id, version_number, artefact, dest).await?;
+        let artefact_info = download_file(client, project_id, project_slug, version_id, version_number, artefact, dest, no_download).await?;
         lock_data.push(artefact_info);
     }
 
@@ -62,12 +63,12 @@ fn required_dependencies(version: &Version) -> Vec<&Dependency> {
 }
 
 #[instrument(skip_all)]
-pub async fn process_manifest(client: &Client, spec: &Spec, output: &Path) -> Result<LockfileV1> {
+pub async fn process_manifest(client: &Client, spec: &Spec, output: &Path, no_download: bool) -> Result<LockfileV1> {
     // Process datapacks
-    let datapack = process_manifest_for_loader(client, spec, Loader::Datapack, output).await?;
+    let datapack = process_manifest_for_loader(client, spec, Loader::Datapack, output, no_download).await?;
 
     // Process fabric mods
-    let fabric = process_manifest_for_loader(client, spec, Loader::Fabric, output).await?;
+    let fabric = process_manifest_for_loader(client, spec, Loader::Fabric, output, no_download).await?;
 
     Ok(LockfileV1 { datapack, fabric })
 }
@@ -197,6 +198,7 @@ async fn process_manifest_for_loader(
     spec: &Spec,
     loader: Loader,
     output: &Path,
+    no_download: bool,
 ) -> Result<Vec<Artefact>> {
     let loader_str = loader.to_string();
     let output = output.join(&loader_str);
@@ -207,7 +209,7 @@ async fn process_manifest_for_loader(
 
     let versions = collect_versions(client, spec, loader).await?;
 
-    let lock_data = download_artefacts(client, versions.iter(), &output).await?;
+    let lock_data = download_artefacts(client, versions.iter(), &output, no_download).await?;
 
     Ok(lock_data)
 }
@@ -217,6 +219,7 @@ async fn download_artefacts(
     client: &Client,
     versions: impl Iterator<Item = &(ModrinthProject, Version)>,
     dest: &Path,
+    no_download: bool,
 ) -> Result<Vec<Artefact>> {
     let mut lock_data_all = Vec::new();
     for (project, version) in versions {
@@ -229,6 +232,7 @@ async fn download_artefacts(
             &version.version_number,
             &primary_artefacts,
             dest,
+            no_download,
         )
         .await?;
 

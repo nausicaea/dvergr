@@ -1,5 +1,10 @@
 #!/bin/sh
 
+export JAVA_HOME=/opt/java/customjdk
+export JAVA_VERSION=jdk-21.0.7+6
+export PATH="${JAVA_HOME}/bin:${PATH}"
+export LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
+
 # For an explanation, see https://docs.papermc.io/paper/aikars-flags
 AIKAR_FLAGS=" \
     -XX:+UseG1GC \
@@ -37,9 +42,18 @@ if [ -n "${OTEL_EXPORTER_OTLP_ENDPOINT}" ]; then
     "
 fi
 
-exec /opt/java/openjdk/bin/java \
+if [ -n "${JOLOKIA_BIND_ADDRESS}" ]; then
+    JOLOKIA_HOST=$(echo "$JOLOKIA_BIND_ADDRESS" | awk -F: '{ print $1 }')
+    JOLOKIA_PORT=$(echo "$JOLOKIA_BIND_ADDRESS" | awk -F: '{ print $2 }')
+    JAVA_OPTS="$JAVA_OPTS \
+        -javaagent:/usr/local/lib/jolokia-javaagent.jar=port=$JOLOKIA_PORT,host=$JOLOKIA_HOST \
+    "
+fi
+
+exec /opt/java/customjdk/bin/java \
     ${JAVA_OPTS} \
     -jar /usr/local/lib/fabric-launcher.jar \
     --serverId "${MINECRAFT_SERVER_ID:-minecraft}" \
     --universe /var/lib/minecraft/universe \
-    --nogui
+    --nogui \
+    "$@"

@@ -43,7 +43,7 @@ async fn lockfile_generation(
         ..Default::default()
     };
 
-    let lockfile = process_manifest(&client, &spec, output.path())
+    let lockfile = process_manifest(&client, &spec, output.path(), true)
         .await
         .unwrap();
 
@@ -65,7 +65,7 @@ async fn project_denylisting(client: Client, #[from(tempdir)] output: TempDir) {
         ..Default::default()
     };
 
-    let lockfile = process_manifest(&client, &spec, output.path())
+    let lockfile = process_manifest(&client, &spec, output.path(), true)
         .await
         .unwrap();
 
@@ -92,7 +92,7 @@ async fn lockfile_includes_dependencies(client: Client, #[from(tempdir)] output:
         ..Default::default()
     };
 
-    let lockfile = process_manifest(&client, &spec, output.path())
+    let lockfile = process_manifest(&client, &spec, output.path(), true)
         .await
         .unwrap();
 
@@ -114,7 +114,7 @@ async fn lockfile_works_for_datapacks(client: Client, #[from(tempdir)] output: T
         ..Default::default()
     };
 
-    let lockfile = process_manifest(&client, &spec, output.path())
+    let lockfile = process_manifest(&client, &spec, output.path(), true)
         .await
         .unwrap();
 

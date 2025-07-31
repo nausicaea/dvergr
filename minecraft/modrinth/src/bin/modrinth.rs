@@ -28,6 +28,9 @@ struct Args {
     /// Specify the path to the lockfile
     #[arg(long)]
     lockfile: Option<PathBuf>,
+    /// Just update the lockfile, don't download the artifacts
+    #[arg(long)]
+    no_download: bool,
 }
 
 impl Args {
@@ -103,7 +106,7 @@ async fn inner_main(args: &Args) -> Result<()> {
     let client = http_client(USER_AGENT, modrinth_api_token.as_deref())
         .context("creating the HTTP REST API client")?;
 
-    let lock = process_manifest(&client, &spec, &output_path)
+    let lock = process_manifest(&client, &spec, &output_path, args.no_download)
         .await
         .context("downloading the specified artefacts")?;
 

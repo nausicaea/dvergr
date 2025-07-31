@@ -5,6 +5,12 @@ services:
     build:
       context: minecraft
       args:
+        # SCCACHE_VERSION: "v0.10.0"
+        # SCCACHE_CHECKSUM: "sha256:d6a1ce4acd02b937cd61bc675a8be029a60f7bc167594c33d75732bbc0a07400"
+        # AWS_ACCESS_KEY_ID: "$AWS_ACCESS_KEY_ID"
+        # AWS_SECRET_ACCESS_KEY: "$AWS_SECRET_ACCESS_KEY"
+        # SCCACHE_BUCKET: "$SCCACHE_BUCKET"
+        # SCCACHE_ENDPOINT: "SCCACHE_ENDPOINT"
         MINECRAFT_VERSION: "1.21.1"
         FABRIC_LOADER_VERSION: 0.16.14
         FABRIC_LOADER_CHECKSUM: sha256:44f3e6cfbefce7bc8761c3b45293d99edf2677ed947021a5ca6481907430c5aa
@@ -12,6 +18,8 @@ services:
         YARN_MAPPINGS_VERSION: 1.21.1+build.3
         OTEL_JAVAAGENT_VERSION: 2.18.1
         OTEL_JAVAAGENT_CHECKSUM: sha256:f5fafdc5684139b04db461c420a46630acf598b44de951efd756e68a73778cfa
+        JOLOKIA_JAVAAGENT_VERSION: 2.2.9
+        JOLOKIA_JAVAAGENT_CHECKSUM: sha256:f5c4b31eeeb602888346ce7b545a885cb7caf932eff3b1b630e93cc720483429
     container_name: minecraft
     healthcheck:
       test: ['CMD', '/bin/healthcheck']
@@ -21,9 +29,10 @@ services:
       start_period: 2m
       start_interval: 5s
     environment:
-      MINECRAFT_SERVER_ID: nausicaea
+      MINECRAFT_SERVER_ID: minecraft
       JAVA_INITIAL_MEM: 256M
-      JAVA_MAX_MEM: ${JAVA_MAX_MEM}
+      JAVA_MAX_MEM: 2G
+      JOLOKIA_BIND_ADDRESS: "0.0.0.0:9422"
     volumes:
       - ./minecraft/server.properties:/var/lib/minecraft/server-config/server.properties:ro
       - ./minecraft/opentelemetry.properties:/var/lib/minecraft/server-config/opentelemetry.properties:ro
@@ -38,8 +47,10 @@ services:
     expose:
       - 30000/tcp
       - 30000/udp
-      - 30001/udp
-    mem_limit: ${MINECRAFT_MEM_LIMIT}
+      - 9422/tcp
+    ports:
+      - 127.0.0.1:9422:9422
+    mem_limit: 2G
 
 volumes:
   backups: {}
