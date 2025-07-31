@@ -18,22 +18,22 @@
   "dimensionBlacklist": [],
   "regionBlacklist": {},
   "enabledAugments": {
-    "goml:withering_seal": true,
-    "goml:force_field": true,
-    "goml:village_core": true,
-    "goml:ender_binding": true,
-    "goml:chaos_zone": true,
-    "goml:lake_spirit_grace": true,
-    "goml:heaven_wings": true,
-    "goml:angelic_aura": true,
-    "goml:greeter": true,
     "goml:explosion_controller": true,
-    "goml:pvp_arena": true
+    "goml:greeter": true,
+    "goml:pvp_arena": true,
+    "goml:ender_binding": true,
+    "goml:lake_spirit_grace": true,
+    "goml:village_core": true,
+    "goml:chaos_zone": true,
+    "goml:angelic_aura": true,
+    "goml:force_field": true,
+    "goml:withering_seal": true,
+    "goml:heaven_wings": true
   },
   "allowedBlockInteraction": [],
   "allowedEntityInteraction": [
-    "minecraft:boat",
     "minecraft:chest_boat",
+    "minecraft:boat",
     "minecraft:minecart"
   ],
   "messagePrefix": "<dark_gray>[<#a1ff59>GOML</color>]",

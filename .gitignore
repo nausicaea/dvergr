@@ -1,3 +1,9 @@
+# Ignore plain Kubernetes secrets
+sec-*.yaml
+
+# Ignore the Rust build directory
+target/
+
 # Created by https://www.toptal.com/developers/gitignore/api/jetbrains+all
 # Edit at https://www.toptal.com/developers/gitignore?templates=jetbrains+all
 

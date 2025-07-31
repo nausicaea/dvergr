@@ -1,0 +1,24 @@
+[package]
+name = "modrinth"
+version = "0.1.0"
+authors = ["Eleanor Young <developer@nausicaea.net>"]
+edition = "2024"
+
+[dependencies]
+anyhow = { version = "1.0.98" }
+chrono = { version = "0.4.41", features = ["serde"] }
+clap = { version = "4.5.41", features = ["derive", "env", "help", "std"] }
+hex = { version = "0.4.3" }
+reqwest = { version = "0.12.22", features = ["json"] }
+serde = { version = "1.0.219", features = ["derive"] }
+sha2 = { version = "0.10.9" }
+tempfile = { version = "3.20.0" }
+tokio = { version = "1.47.0", features = ["macros", "rt", "rt-multi-thread", "fs"] }
+tokio-stream = "0.1.17"
+tokio-util = { version = "0.7.15", features = ["io"] }
+toml = { version = "0.9.2", features = ["serde"] }
+tracing = { version = "0.1.41" }
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+
+[dev-dependencies]
+rstest = "0.26.1"

@@ -89,12 +89,12 @@ jobs:
           build-args: |
             MODRINTH_PAT=$MODRINTH_PAT
             MINECRAFT_VERSION=1.21.1
-            FABRIC_LOADER_VERSION=0.16.5
-            FABRIC_LOADER_CHECKSUM=sha256:243ac92e0ddb12b031218d46d71f211d99d4d61a73fb2538bf73beee1ab37556
-            FABRIC_INSTALLER_VERSION=1.0.1
+            FABRIC_LOADER_VERSION=0.16.14
+            FABRIC_LOADER_CHECKSUM=sha256:44f3e6cfbefce7bc8761c3b45293d99edf2677ed947021a5ca6481907430c5aa
+            FABRIC_INSTALLER_VERSION=1.0.3
             YARN_MAPPINGS_VERSION=1.21.1+build.3
-            OTEL_JAVAAGENT_VERSION=1.33.5
-            OTEL_JAVAAGENT_CHECKSUM=sha256:e77f7f3e2f2601a288bd8cb9deb7e2f9578034344e761587f51f03e097ae02ce
+            OTEL_JAVAAGENT_VERSION=2.18.1
+            OTEL_JAVAAGENT_CHECKSUM=sha256:f5fafdc5684139b04db461c420a46630acf598b44de951efd756e68a73778cfa
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
