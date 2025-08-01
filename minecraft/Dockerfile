@@ -1,41 +1,5 @@
 # syntax=docker/dockerfile:1
 
-### Builds the Modrinth downloader used in the downloader build step
-FROM docker.io/library/rust:1.88.0-alpine3.22 AS builder_a
-ARG TARGETARCH
-ARG TARGETOS
-ARG OPENSSL_STATIC=1
-ARG OPENSSL_LIB_DIR=/usr/lib
-ARG OPENSSL_INCLUDE_DIR=/usr/include
-#ARG SCCACHE_VERSION
-#ARG SCCACHE_CHECKSUM
-#ARG AWS_ACCESS_KEY_ID
-#ARG AWS_SECRET_ACCESS_KEY
-#ARG SCCACHE_BUCKET
-#ARG SCCACHE_ENDPOINT
-#ARG SCCACHE_REGION=auto
-#ARG SCCACHE_S3_USE_SSL=true
-#ARG SCCACHE_S3_SERVER_SIDE_ENCRYPTION=true
-#ARG RUSTC_WRAPPER=/usr/local/bin/sccache
-ARG CARGO_REGISTRY=/root/.cargo/registry
-RUN apk add --no-cache openssl-libs-static openssl-dev musl-dev
-# WORKDIR /tmp
-# ADD --link --checksum=${SCCACHE_CHECKSUM} https://github.com/mozilla/sccache/releases/download/${SCCACHE_VERSION}/sccache-${SCCACHE_VERSION}-${TARGETARCH}-unknown-${TARGETOS}-musl.tar.gz ./sccache-${SCCACHE_VERSION}.tar.gz
-# RUN <<-EOF
-# set -ex;
-# tar -xzf ./sccache-${SCCACHE_VERSION}.tar.gz sccache-${SCCACHE_VERSION}/sccache;
-# install -o root -g root -m 0755 ./sccache-${SCCACHE_VERSION}/sccache /usr/local/bin/sccache;
-# sccache --show-stats;
-# EOF
-WORKDIR /src
-COPY --link modrinth/Cargo.toml .
-COPY --link modrinth/Cargo.lock .
-COPY --link modrinth/src ./src
-RUN --mount=type=cache,target=/root/.cargo cargo fetch
-RUN --mount=type=cache,target=/root/.cargo --mount=type=cache,target=/src/target cargo build --locked --release
-WORKDIR /artefacts
-RUN --mount=type=cache,target=/src/target cp /src/target/release/modrinth /artefacts/modrinth
-
 ### Builds the Opentelemetry integration as a mod for fabric
 FROM docker.io/library/gradle:8.14.2-jdk21-alpine AS builder_b
 ARG MINECRAFT_VERSION
@@ -67,7 +31,7 @@ RUN $JAVA_HOME/bin/jlink \
          --output /artefacts/optimized-jdk-21
 
 ### Downloads all selected mods and datapacks from Modrinth
-FROM docker.io/library/alpine:3.22 AS downloader
+FROM ghcr.io/nausicaea/nema:v0.1.3 AS downloader
 ARG MINECRAFT_VERSION
 ARG FABRIC_LOADER_VERSION
 ARG FABRIC_LOADER_CHECKSUM
@@ -79,12 +43,9 @@ ARG JOLOKIA_JAVAAGENT_CHECKSUM
 ADD --link --checksum=${FABRIC_LOADER_CHECKSUM} https://meta.fabricmc.net/v2/versions/loader/${MINECRAFT_VERSION}/${FABRIC_LOADER_VERSION}/${FABRIC_INSTALLER_VERSION}/server/jar /artefacts/lib/fabric-launcher.jar
 ADD --link --checksum=${OTEL_JAVAAGENT_CHECKSUM} https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar /artefacts/lib/opentelemetry-javaagent.jar
 ADD --link --checksum=${JOLOKIA_JAVAAGENT_CHECKSUM} https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-agent-jvm/${JOLOKIA_JAVAAGENT_VERSION}/jolokia-agent-jvm-${JOLOKIA_JAVAAGENT_VERSION}-javaagent.jar /artefacts/lib/jolokia-javaagent.jar
-COPY --from=builder_a --chmod=0755 /artefacts/modrinth /bin/modrinth
 RUN --mount=type=secret,id=MODRINTH_PAT,env=MODRINTH_PAT --mount=type=bind,target=/tmp/Modrinth.toml,source=./Modrinth.toml --mount=type=bind,target=/tmp/Modrinth.lock,source=./Modrinth.lock <<-EOC
 set -xe;
-mkdir -p /artefacts;
-export RUST_LOG="modrinth=debug";
-/bin/modrinth -o /artefacts -s --lockfile /tmp/Modrinth.lock --manifest /tmp/Modrinth.toml;
+/usr/local/bin/modrinth -o /artefacts --strict -s --lockfile /tmp/Modrinth.lock --manifest /tmp/Modrinth.toml;
 EOC
 
 ### Builds and runs the final image
