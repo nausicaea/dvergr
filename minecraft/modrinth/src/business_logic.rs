@@ -63,12 +63,12 @@ fn required_dependencies(version: &Version) -> Vec<&Dependency> {
 }
 
 #[instrument(skip_all)]
-pub async fn process_manifest(client: &Client, spec: &Spec, output: &Path, no_download: bool) -> Result<LockfileV1> {
+pub async fn process_manifest(client: &Client, spec: &Spec, output: &Path, no_download: bool, strict: bool) -> Result<LockfileV1> {
     // Process datapacks
-    let datapack = process_manifest_for_loader(client, spec, Loader::Datapack, output, no_download).await?;
+    let datapack = process_manifest_for_loader(client, spec, Loader::Datapack, output, no_download, strict).await?;
 
     // Process fabric mods
-    let fabric = process_manifest_for_loader(client, spec, Loader::Fabric, output, no_download).await?;
+    let fabric = process_manifest_for_loader(client, spec, Loader::Fabric, output, no_download, strict).await?;
 
     Ok(LockfileV1 { datapack, fabric })
 }
@@ -199,6 +199,7 @@ async fn process_manifest_for_loader(
     loader: Loader,
     output: &Path,
     no_download: bool,
+    strict: bool,
 ) -> Result<Vec<Artefact>> {
     let loader_str = loader.to_string();
     let output = output.join(&loader_str);
@@ -207,7 +208,7 @@ async fn process_manifest_for_loader(
         std::fs::create_dir_all(&output).context("creating the output directory")?;
     }
 
-    let versions = collect_versions(client, spec, loader).await?;
+    let versions = collect_versions(client, spec, loader, strict).await?;
 
     let lock_data = download_artefacts(client, versions.iter(), &output, no_download).await?;
 
@@ -277,11 +278,11 @@ fn validate_server_compatibility(project: &ModrinthProject) -> Result<()> {
 }
 
 #[instrument(skip_all)]
-async fn collect_versions(client: &Client, spec: &Spec, loader: Loader) -> Result<HashSet<(ModrinthProject, Version)>> {
+async fn collect_versions(client: &Client, spec: &Spec, loader: Loader, strict: bool) -> Result<HashSet<(ModrinthProject, Version)>> {
     let mut bfs_queue: VecDeque<(ModrinthProject, Version)> = VecDeque::new();
     for (project_name, project_spec) in spec.manifest.get(loader) {
         if let (project, Some(version)) =
-            collect_version(client, spec, loader, project_name, project_spec).await?
+            collect_version(client, spec, loader, project_name, project_spec, strict).await?
         {
             bfs_queue.push_back((project, version));
         }
@@ -301,7 +302,7 @@ async fn collect_versions(client: &Client, spec: &Spec, loader: Loader) -> Resul
             };
 
             let (dep_project, dep_version) = if let Some(pi) = &dep.project_id {
-                match collect_version(client, spec, loader, pi, &dep_spec).await {
+                match collect_version(client, spec, loader, pi, &dep_spec, strict).await {
                     Ok((project, Some(version))) => (project, version),
                     Ok((_, None)) => continue,
                     Err(e) => return Err(e),
@@ -327,6 +328,7 @@ async fn collect_version(
     loader: Loader,
     project_name: &str,
     project_spec: &Project,
+    strict: bool,
 ) -> Result<(ModrinthProject, Option<Version>)> {
     let project = request_project(client, &spec.modrinth_api_url, project_name).await?;
 
@@ -361,8 +363,12 @@ async fn collect_version(
     });
 
     let Some(version) = most_recent_version(&versions) else {
-        warn!("could not find a compatible version");
-        return Ok((project, None));
+        if strict {
+            return Err(anyhow!("{project_name}: could not find a compatible version"));
+        } else {
+            warn!("could not find a compatible version");
+            return Ok((project, None));
+        }
     };
 
     Ok((project, Some(version.clone())))

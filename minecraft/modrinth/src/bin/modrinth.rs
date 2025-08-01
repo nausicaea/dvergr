@@ -31,6 +31,9 @@ struct Args {
     /// Just update the lockfile, don't download the artifacts
     #[arg(long)]
     no_download: bool,
+    /// Fail if no compatible versions are found
+    #[arg(long)]
+    strict: bool,
 }
 
 impl Args {
@@ -106,7 +109,7 @@ async fn inner_main(args: &Args) -> Result<()> {
     let client = http_client(USER_AGENT, modrinth_api_token.as_deref())
         .context("creating the HTTP REST API client")?;
 
-    let lock = process_manifest(&client, &spec, &output_path, args.no_download)
+    let lock = process_manifest(&client, &spec, &output_path, args.no_download, args.strict)
         .await
         .context("downloading the specified artefacts")?;
 
