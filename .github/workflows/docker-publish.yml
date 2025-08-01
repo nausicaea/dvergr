@@ -88,6 +88,8 @@ jobs:
           platforms: |
             linux/amd64
             linux/arm64
+          secrets: |
+            MODRINTH_PAT=${{ secrets.MODRINTH_PAT }}
           build-args: |
             MINECRAFT_VERSION=${{ vars.MINECRAFT_VERSION }}
             FABRIC_LOADER_VERSION=${{ vars.FABRIC_LOADER_VERSION }}
