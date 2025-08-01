@@ -26,7 +26,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    environment: Minecraft 1.21.1
+    environment: Minecraft 1.21.4
     permissions:
       contents: read
       packages: write
@@ -34,7 +34,7 @@ jobs:
       # with sigstore/fulcio when running outside of PRs.
       id-token: write
 
-    steps:      
+    steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -93,7 +93,7 @@ jobs:
             FABRIC_INSTALLER_VERSION=${{ vars.FABRIC_INSTALLER_VERSION }}
             YARN_MAPPINGS_VERSION=${{ vars.YARN_MAPPINGS_VERSION }}
             OTEL_JAVAAGENT_VERSION=${{ vars.OTEL_JAVAAGENT_VERSION }}
-            OTEL_JAVAAGENT_CHECKSUM=${{ vars.OTEL_JAVAAGENT_CHECKSUM }} 
+            OTEL_JAVAAGENT_CHECKSUM=${{ vars.OTEL_JAVAAGENT_CHECKSUM }}
             JOLOKIA_JAVAAGENT_VERSION=${{ vars.JOLOKIA_JAVAAGENT_VERSION }}
             JOLOKIA_JAVAAGENT_CHECKSUM=${{ vars.JOLOKIA_JAVAAGENT_CHECKSUM }}
 
