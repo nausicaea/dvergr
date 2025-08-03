@@ -5,12 +5,6 @@ services:
     build:
       context: minecraft
       args:
-        # SCCACHE_VERSION: "v0.10.0"
-        # SCCACHE_CHECKSUM: "sha256:d6a1ce4acd02b937cd61bc675a8be029a60f7bc167594c33d75732bbc0a07400"
-        # AWS_ACCESS_KEY_ID: "$AWS_ACCESS_KEY_ID"
-        # AWS_SECRET_ACCESS_KEY: "$AWS_SECRET_ACCESS_KEY"
-        # SCCACHE_BUCKET: "$SCCACHE_BUCKET"
-        # SCCACHE_ENDPOINT: "SCCACHE_ENDPOINT"
         MINECRAFT_VERSION: "1.21.4"
         FABRIC_LOADER_VERSION: 0.16.14
         FABRIC_LOADER_CHECKSUM: sha256:c5074fbaba7834d43d9bbed0be159735e798bfe4eaf735c25c825e659fe2ab03
@@ -21,8 +15,9 @@ services:
         JOLOKIA_JAVAAGENT_VERSION: 2.2.9
         JOLOKIA_JAVAAGENT_CHECKSUM: sha256:f5c4b31eeeb602888346ce7b545a885cb7caf932eff3b1b630e93cc720483429
     container_name: minecraft
+    #entrypoint: ["/bin/sh", "-c", "while true; do sleep 1; done"]
     healthcheck:
-      test: ['CMD', '/bin/healthcheck']
+      test: ['CMD', '/usr/local/bin/healthcheck']
       interval: 30s
       timeout: 3s
       retries: 3
@@ -34,29 +29,25 @@ services:
       JAVA_MAX_MEM: 2G
       JOLOKIA_BIND_ADDRESS: "0.0.0.0:9422"
     volumes:
-      - ./minecraft/server.properties:/var/lib/minecraft/server-config/server.properties:ro
-      - ./minecraft/opentelemetry.properties:/var/lib/minecraft/server-config/opentelemetry.properties:ro
-      - ./minecraft/log4j2.xml:/var/lib/minecraft/server-config/log4j2.xml:ro
-      - backups:/var/lib/minecraft/backups
-      - cache:/var/lib/minecraft/.fabric
-      - crash_reports:/var/lib/minecraft/crash-reports
-      - logs:/var/lib/minecraft/logs
-      - mod_config:/var/lib/minecraft/config
-      - player_config:/var/lib/minecraft/player-config
-      - universe:/var/lib/minecraft/universe
+      - persistent:/var/lib/minecraft/persistent
+      - config:/etc/minecraft
+      - cache:/var/cache/minecraft
+      - logs:/var/log/minecraft
     expose:
       - 30000/tcp
       - 30000/udp
       - 9422/tcp
     ports:
-      - 127.0.0.1:9422:9422
+      - 127.0.0.1:25565:30000/tcp
+      - 127.0.0.1:25565:30000/udp
     mem_limit: 2G
 
 volumes:
-  backups: {}
+  # pvc/pv
+  persistent: {}
+  # emptyDir <- copy over from init container
+  config: {}
+  # emptyDir
   cache: {}
-  crash_reports: {}
+  # emptyDir
   logs: {}
-  mod_config: {}
-  player_config: {}
-  universe: {}

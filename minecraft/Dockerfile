@@ -50,6 +50,7 @@ EOC
 
 ### Builds and runs the final image
 FROM docker.io/library/alpine:3.22
+VOLUME ["/var/lib/minecraft/persistent", "/etc/minecraft", "/var/cache/minecraft", "/var/log/minecraft"]
 ARG MINECRAFT_VERSION
 ENV MINECRAFT_SERVER_ID=minecraft
 ENV JAVA_INITIAL_MEM=256M
@@ -62,34 +63,83 @@ set -xe;
 addgroup -S -g 10001 minecraft;
 adduser -S -u 10001 -G minecraft -h /var/lib/minecraft -g "Minecraft Server" -s /bin/sh minecraft;
 EOC
-COPY --link --chmod=0755 docker-entrypoint.sh /bin/docker-entrypoint
-COPY --link --chmod=0755 healthcheck.sh /bin/healthcheck
+COPY --link --chmod=0755 bin/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+COPY --link --chmod=0755 bin/healthcheck.sh /usr/local/bin/healthcheck
 COPY --link --from=downloader --chmod=0644 /artefacts/lib/*.jar /usr/local/lib/
+
+# Provision config files
+WORKDIR /etc/minecraft
+COPY --link --chown=10001:10001 config/ .
+RUN <<-EOF
+set -xe;
+mkdir default;
+chown -vR minecraft:minecraft .;
+chmod -vR u=rwX,go=rX .;
+EOF
+
+# Provision the cache
+WORKDIR /var/cache/minecraft
+RUN <<-EOF
+set -xe;
+mkdir -v .cache .fabric .polydex cache polymer stackdeobf_mappings;
+chown -vR minecraft:minecraft .;
+chmod -vR u=rwX,go=rX .;
+EOF
+
+# Provision logs
+WORKDIR /var/log/minecraft
+RUN <<-EOF
+set -xe;
+mkdir -v crash-reports;
+chown -vR minecraft:minecraft .;
+chmod -vR u=rwX,go=rX .;
+EOF
+
+# Provision the server home directory
 WORKDIR /var/lib/minecraft
-COPY --link --chown=10001:10001 player-config/ ./player-config/
-COPY --link --chown=10001:10001 mod-config/ ./config/
-COPY --link --chown=10001:10001 server-icon.png ./
-COPY --link --chown=10001:10001 eula.txt server.properties log4j2.xml opentelemetry.properties ./server-config/
 COPY --from=builder_b --chown=10001:10001 /artefacts/otel-0.0.0.jar ./mods/
 COPY --from=downloader --chown=10001:10001 /artefacts/fabric/*.jar ./mods/
-COPY --from=downloader --chown=10001:10001 /artefacts/datapack/*.zip ./universe/world/datapacks/
-RUN <<-EOC
+COPY --from=downloader --chown=10001:10001 /artefacts/datapack/*.zip ./persistent/universe/world/datapacks/
+RUN <<-EOF
 set -xe;
-ln -s ./server-config/eula.txt eula.txt;
-ln -s ./server-config/server.properties server.properties;
-ln -s ./player-config/whitelist.json whitelist.json;
-ln -s ./player-config/ops.json ops.json;
-ln -s ./player-config/banned-ips.json banned-ips.json;
-ln -s ./player-config/banned-players.json banned-players.json;
-mkdir -p .cache .fabric backups crash-reports libraries logs mods/luckperms polymer stackdeobf_mappings universe versions;
-chown -R 10001:10001 /var/lib/minecraft;
-find . -type d -exec chmod 0755 {} \+;
-find . -type f -exec chmod 0644 {} \+;
-EOC
+# Create directories for volume mounts
+mkdir -vp persistent/backups persistent/luckperms persistent/universe;
+
+# Create symlinks for files and directories with hard-coded paths
+# Persistent data (read-write)
+ln -s /var/lib/minecraft/persistent/backups backups;
+ln -s /var/lib/minecraft/persistent/luckperms mods/luckperms;
+ln -s /var/lib/minecraft/persistent/universe universe;
+# Configuration files (read-only)
+ln -s /etc/minecraft/server/server-icon.png server-icon.png;
+ln -s /etc/minecraft/server/eula.txt eula.txt;
+ln -s /etc/minecraft/server/server.properties server.properties;
+ln -s /etc/minecraft/player/whitelist.json whitelist.json;
+ln -s /etc/minecraft/player/ops.json ops.json;
+ln -s /etc/minecraft/player/banned-ips.json banned-ips.json;
+ln -s /etc/minecraft/player/banned-players.json banned-players.json;
+ln -s /etc/minecraft/mods config;
+ln -s /etc/minecraft/default defaultconfigs;
+# Caches (ephemeral)
+ln -s /var/cache/minecraft/.cache ./.cache;
+ln -s /var/cache/minecraft/.fabric ./.fabric;
+ln -s /var/cache/minecraft/.polydex ./.polydex;
+ln -s /var/cache/minecraft/cache ./cache;
+ln -s /var/cache/minecraft/polymer ./polymer;
+ln -s /var/cache/minecraft/stackdeobf_mappings ./stackdeobf_mappings;
+# Logs (ephemeral)
+ln -s /var/log/minecraft/crash-reports ./crash-reports;
+
+# Fix ownership and permissions
+chown -vR minecraft:minecraft .;
+chmod -vR u=rwX,go=rX .;
+EOF
+
+# Drop down to the service user
 USER minecraft:minecraft
 
 # Pre-condition the server environment (--initSettings won't work due to a read-only server.properties)
-RUN /bin/docker-entrypoint --help
+RUN /usr/local/bin/docker-entrypoint --help
 
 ### Last-ditch Optimizations
 # find /usr/local/lib /var/lib/minecraft/libraries /var/lib/minecraft/mods /var/lib/minecraft/versions -type f -name "*.jar" -exec zip -d {} 'META-INF/*.SF' 'META-INF/*.RSA' 'LICENSE*' 'README*' \;
@@ -97,4 +147,4 @@ RUN /bin/docker-entrypoint --help
 # java -cp r8.jar com.android.tools.r8.R8 --help
 
 EXPOSE 30000/tcp 30000/udp
-ENTRYPOINT ["/bin/docker-entrypoint"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
