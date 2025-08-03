@@ -8,6 +8,7 @@ navigable-rivers = "*"
 new-in-town = "*"
 new-in-town-dimensions = "*"
 mystcraft-data-pack = "*"
+saturated = "*"
 
 [fabric]
 # Not compatible with > 1.21.1
