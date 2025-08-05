@@ -100,6 +100,8 @@ jobs:
             OTEL_JAVAAGENT_CHECKSUM=${{ vars.OTEL_JAVAAGENT_CHECKSUM }}
             JOLOKIA_JAVAAGENT_VERSION=${{ vars.JOLOKIA_JAVAAGENT_VERSION }}
             JOLOKIA_JAVAAGENT_CHECKSUM=${{ vars.JOLOKIA_JAVAAGENT_CHECKSUM }}
+            OTEL_MOD_VERSION=${{ vars.OTEL_MOD_VERSION }}
+            OTEL_MOD_CHECKSUM=${{ vars.OTEL_MOD_CHECKSUM }}
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker

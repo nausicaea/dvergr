@@ -1,20 +1,5 @@
 # syntax=docker/dockerfile:1
 
-### Builds the Opentelemetry integration as a mod for fabric
-FROM docker.io/library/gradle:8.14.2-jdk21-alpine AS builder_b
-ARG MINECRAFT_VERSION
-ARG YARN_MAPPINGS_VERSION
-ARG FABRIC_LOADER_VERSION
-WORKDIR /src
-COPY --link otel-mod/build.gradle ./
-COPY --link otel-mod/settings.gradle ./
-COPY --link otel-mod/gradle.properties ./
-COPY --link otel-mod/src ./src
-RUN --mount=type=cache,target=/root/.gradle --mount=type=cache,target=/src/.gradle gradle --no-daemon --build-cache :dependencies
-RUN --mount=type=cache,target=/root/.gradle --mount=type=cache,target=/src/.gradle gradle --no-daemon --build-cache :assemble
-WORKDIR /artefacts
-RUN cp /src/build/libs/otel-0.0.0.jar /artefacts/otel-0.0.0.jar
-
 ### Builds the final Java runtime image
 FROM docker.io/library/eclipse-temurin:21.0.7_6-jdk-alpine-3.21 AS builder_c
 RUN apk add --no-cache binutils
@@ -40,9 +25,12 @@ ARG OTEL_JAVAAGENT_VERSION
 ARG OTEL_JAVAAGENT_CHECKSUM
 ARG JOLOKIA_JAVAAGENT_VERSION
 ARG JOLOKIA_JAVAAGENT_CHECKSUM
+ARG OTEL_MOD_VERSION
+ARG OTEL_MOD_CHECKSUM
 ADD --link --checksum=${FABRIC_LOADER_CHECKSUM} https://meta.fabricmc.net/v2/versions/loader/${MINECRAFT_VERSION}/${FABRIC_LOADER_VERSION}/${FABRIC_INSTALLER_VERSION}/server/jar /artefacts/lib/fabric-launcher.jar
 ADD --link --checksum=${OTEL_JAVAAGENT_CHECKSUM} https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar /artefacts/lib/opentelemetry-javaagent.jar
 ADD --link --checksum=${JOLOKIA_JAVAAGENT_CHECKSUM} https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-agent-jvm/${JOLOKIA_JAVAAGENT_VERSION}/jolokia-agent-jvm-${JOLOKIA_JAVAAGENT_VERSION}-javaagent.jar /artefacts/lib/jolokia-javaagent.jar
+ADD --link --checksum=${OTEL_MOD_CHECKSUM} https://github.com/nausicaea/opentelemetry-fabric/releases/download/v${OTEL_MOD_VERSION}/otel-${OTEL_MOD_VERSION}.jar /artefacts/fabric/otel-${OTEL_MOD_VERSION}.jar
 COPY --link provocation-v0.1.0.zip /artefacts/datapack/
 RUN --mount=type=secret,id=MODRINTH_PAT,env=MODRINTH_PAT --mount=type=bind,target=/tmp/Modrinth.toml,source=./Modrinth.toml --mount=type=bind,target=/tmp/Modrinth.lock,source=./Modrinth.lock <<-EOC
 set -xe;
@@ -98,7 +86,6 @@ EOF
 
 # Provision the server home directory
 WORKDIR /var/lib/minecraft
-COPY --from=builder_b --chown=10001:10001 /artefacts/otel-0.0.0.jar ./mods/
 COPY --from=downloader --chown=10001:10001 /artefacts/fabric/*.jar ./mods/
 COPY --from=downloader --chown=10001:10001 /artefacts/datapack/*.zip ./persistent/universe/world/datapacks/
 RUN <<-EOF
