@@ -1,51 +1,62 @@
 [datapack]
-sleep = "*"
-vegan-recipes = "*"
+# Worldgen (Overworld)
 "william-wythers-overhauled-overworld-(datapack)" = "*"
 towering-tepuis = "*"
 cliffs-and-coves = "*"
 navigable-rivers = "*"
-new-in-town = "*"
+
+# Worldgen (other)
 new-in-town-dimensions = "*"
 mystcraft-data-pack = "*"
 saturated = "*"
 
-[fabric]
-# Not compatible with > 1.21.1
-#smsn = "*"
-#mixintrace = "*"
-#fabric-tps = "*"
-#mod-viewer = "*"
-#server-ui-fix = "*"
-#polydex-bridge = "*"
-#universal-perms = "*"
+# # Other
+sleep = "*"
+vegan-recipes = "*"
+new-in-town = "*"
 
+[fabric]
+# Worldgen (Overworld)
+tectonic = "*"
+
+# Worldgen (other)
+nullscape = "*"
+
+# Polymerized
+polydex = "*"
 polydecorations = "*"
-dynamic-lights = "*"
-leaves-be-gone = "*"
-lmd = "*"
-midnightlib = "*"
+# trinkets-polymer = "*" # Causes loads of Exceptions "leaked resource" when starting the server
+baby-fat-polymer = "*"
+polyfactory = "*"
+arcana-novum = "*"
+# server-storage = "*"
+
+# Admin
+advanced-backups = "*"
+luckperms = "*"
+#melius-worldmanager = "*" # Cannot use Nether portals in overworld maps created by this mod
+stackdeobf = "*"
+coord-finder = "*"
+# spark = "*"
+# otel-instrumentation-extension = "*"  # https://github.com/litetex-oss/mcm-otel-instrumentation-extension
+# fabricexporter = "*"  # https://modrinth.com/mod/fabricexporter
+
+# Optimization
 ferrite-core = "*"
 lithium = "*"
 noisium = "*"
 c2me-fabric = "*"
 krypton = "*"
-advanced-backups = "*"
-stackdeobf = "*"
 modernfix = "*"
+
+# Other
+dynamic-lights = "*"
+leaves-be-gone = "*"
+lmd = "*"
+midnightlib = "*"
 sessility = "*"
-coord-finder = "*"
 goml-reserved = "*"
-luckperms = "*"
 tpa = "*"
-polydex = "*"
 vanilla-refresh = "*"
-nullscape = "*"
-polyfactory = "*"
-arcana-novum = "*"
 passivemobs = "*"
-tectonic = "*"
-melius-worldmanager = "*"
 fleeing-animals = "*"
-trinkets-polymer = "*"
-baby-fat-polymer = "*"

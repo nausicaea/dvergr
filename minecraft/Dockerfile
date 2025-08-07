@@ -39,6 +39,7 @@ EOC
 
 ### Builds and runs the final image
 FROM docker.io/library/alpine:3.22
+EXPOSE 30000/tcp 30000/udp
 VOLUME ["/var/lib/minecraft/persistent", "/etc/minecraft", "/var/cache/minecraft", "/var/log/minecraft"]
 ARG MINECRAFT_VERSION
 ENV MINECRAFT_SERVER_ID=minecraft
@@ -70,7 +71,7 @@ EOF
 WORKDIR /var/cache/minecraft
 RUN <<-EOF
 set -xe;
-mkdir -v .cache .fabric .polydex cache polymer stackdeobf_mappings;
+mkdir -v .cache .fabric .polydex cache libraries polymer stackdeobf_mappings versions;
 chown -vR minecraft:minecraft .;
 chmod -vR u=rwX,go=rX .;
 EOF
@@ -113,8 +114,10 @@ ln -s /var/cache/minecraft/.cache ./.cache;
 ln -s /var/cache/minecraft/.fabric ./.fabric;
 ln -s /var/cache/minecraft/.polydex ./.polydex;
 ln -s /var/cache/minecraft/cache ./cache;
+ln -s /var/cache/minecraft/libraries ./libraries;
 ln -s /var/cache/minecraft/polymer ./polymer;
 ln -s /var/cache/minecraft/stackdeobf_mappings ./stackdeobf_mappings;
+ln -s /var/cache/minecraft/versions ./versions;
 # Logs (ephemeral)
 ln -s /var/log/minecraft/crash-reports ./crash-reports;
 
@@ -123,16 +126,5 @@ chown -vR minecraft:minecraft .;
 chmod -vR u=rwX,go=rX .;
 EOF
 
-# Drop down to the service user
 USER minecraft:minecraft
-
-# Pre-condition the server environment (--initSettings won't work due to a read-only server.properties)
-RUN /usr/local/bin/docker-entrypoint --help
-
-### Last-ditch Optimizations
-# find /usr/local/lib /var/lib/minecraft/libraries /var/lib/minecraft/mods /var/lib/minecraft/versions -type f -name "*.jar" -exec zip -d {} 'META-INF/*.SF' 'META-INF/*.RSA' 'LICENSE*' 'README*' \;
-# curl -LO "https://storage.googleapis.com/r8-releases/raw/8.11.18/r8.jar"
-# java -cp r8.jar com.android.tools.r8.R8 --help
-
-EXPOSE 30000/tcp 30000/udp
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint"]
