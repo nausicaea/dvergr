@@ -47,6 +47,7 @@ ENV JAVA_INITIAL_MEM=256M
 ENV JAVA_MAX_MEM=2G
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=""
 ENV JOLOKIA_BIND_ADDRESS=""
+ENV MAINTENANCE_MODE=0
 COPY --from=builder_c /artefacts/optimized-jdk-21 /opt/java/customjdk
 RUN <<-EOC
 set -xe;

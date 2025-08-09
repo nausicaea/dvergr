@@ -5,6 +5,15 @@ export JAVA_VERSION=jdk-21.0.7+6
 export PATH="${JAVA_HOME}/bin:${PATH}"
 export LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
 
+if [ "$MAINTENANCE_MODE" = "1" ]; then
+    echo "*** ENTERING MAINTENANCE MODE ***" >&2
+    echo "*** Minecraft will not start  ***" >&2
+    while true; do
+        sleep 1
+    done
+    exit 0
+fi
+
 # For an explanation, see https://docs.papermc.io/paper/aikars-flags
 AIKAR_FLAGS=" \
     -XX:+UseG1GC \
