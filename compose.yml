@@ -1,7 +1,7 @@
 name: minecraft
 services:
   minecraft:
-    image: nausicaea/minecraft:local
+    image: nausicaea/dvergr:local
     build:
       context: minecraft
       args:
