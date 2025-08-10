@@ -1,19 +1,6 @@
 # Manual additions
-otel-mod/.gradle/
-otel-mod/build/
-otel-mod/run/
 .direnv
 .envrc
 .env
 .DS_Store
-server-config/.DS_Store
-player-config/.DS_Store
-mod-config/.DS_Store
-mod-config/fabric/.DS_Store
-mod-config/luckperms/.DS_Store
-mod-config/luckperms/translations/.DS_Store
-mod-config/luckperms/translations/custom/.DS_Store
-mod-config/luckperms/translations/repository/.DS_Store
-mod-config/messages/.DS_Store
-mod-config/messages/worldmanager/.DS_Store
-mod-config/polymer/.DS_Store
+**/.DS_Store
