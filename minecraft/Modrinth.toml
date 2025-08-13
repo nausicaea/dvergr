@@ -1,3 +1,5 @@
+minecraft_version = "1.21.4"
+
 [datapack]
 # Worldgen (Overworld)
 "william-wythers-overhauled-overworld-(datapack)" = "*"

@@ -16,7 +16,7 @@ RUN $JAVA_HOME/bin/jlink \
          --output /artefacts/optimized-jdk-21
 
 ### Downloads all selected mods and datapacks from Modrinth
-FROM ghcr.io/nausicaea/nema:v0.1.3 AS downloader
+FROM ghcr.io/nausicaea/nema:v0.2.1 AS downloader
 ARG MINECRAFT_VERSION
 ARG FABRIC_LOADER_VERSION
 ARG FABRIC_LOADER_CHECKSUM
