@@ -29,17 +29,19 @@ polydecorations = "*"
 baby-fat-polymer = "*"
 polyfactory = "*"
 arcana-novum = "*"
-# server-storage = "*"
+# server-storage = "*"  # https://modrinth.com/mod/server-storage
 
 # Admin
 advanced-backups = "*"
 luckperms = "*"
-#melius-worldmanager = "*" # Cannot use Nether portals in overworld maps created by this mod
 stackdeobf = "*"
 coord-finder = "*"
 # spark = "*"
 # otel-instrumentation-extension = "*"  # https://github.com/litetex-oss/mcm-otel-instrumentation-extension
 # fabricexporter = "*"  # https://modrinth.com/mod/fabricexporter
+# ender-nexus = "*"  # https://modrinth.com/mod/ender-nexus
+# limited-afk = "*"  # https://modrinth.com/mod/limited-afk
+# fabric-trade = "*"  # https://modrinth.com/mod/fabric-trade
 
 # Optimization
 ferrite-core = "*"
