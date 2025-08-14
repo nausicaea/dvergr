@@ -609,8 +609,8 @@ data:
     allow-flight=false
     allow-nether=true
     broadcast-console-to-ops=true
-    broadcast-rcon-to-ops=false
-    bug-report-link=https://github.com/nausicaea/minecraft/issues
+    broadcast-rcon-to-ops=true
+    bug-report-link=https://github.com/nausicaea/dvergr/issues
     debug=false
     difficulty=easy
     enable-command-block=false
