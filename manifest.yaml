@@ -5,6 +5,21 @@ metadata:
   name: minecraft
   labels:
     app.kubernetes.io/name: minecraft
+# TEMPLATE FOR SECRET
+# ---
+# apiVersion: v1
+# kind: Secret
+# type: Opaque
+# metadata:
+#   name: player-config
+#   namespace: minecraft
+#   labels:
+#     app.kubernetes.io/name: minecraft
+# stringData:
+#   banned-ips.json: "[]"
+#   banned-players.json: "[]"
+#   ops.json: "[]"
+#   whitelist.json: "[]"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -16,7 +31,7 @@ metadata:
 data:
   MINECRAFT_SERVER_ID: "minecraft"
   JAVA_INITIAL_MEM: "256M"
-  JAVA_MAX_MEM: "4G"
+  JAVA_MAX_MEM: "3G"
   OTEL_EXPORTER_OTLP_ENDPOINT: ""
   MAINTENANCE_MODE: "0"
 ---
@@ -584,19 +599,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: player-config
-  namespace: minecraft
-  labels:
-    app.kubernetes.io/name: minecraft
-data:
-  banned-ips.json: "[]"
-  banned-players.json: "[]"
-  ops.json: "[]"
-  whitelist.json: "[]"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: server-config
   namespace: minecraft
   labels:
@@ -772,7 +774,7 @@ spec:
                       path: server/opentelemetry.properties
                     - key: log4j2.xml
                       path: server/log4j2.xml
-              - configMap:
+              - secret:
                   name: player-config
                   items:
                     - key: banned-ips.json
@@ -888,12 +890,13 @@ spec:
                 name: env-vars
           resources:
             requests:
-              cpu: "6"
-              memory: 4Gi
+              cpu: "4"
+              memory: 3Gi
             limits:
-              cpu: "6"
-              memory: 4Gi
-
+              cpu: "4"
+              memory: 3.5Gi
+          stdin: true
+          tty: true
           volumeMounts:
             - name: persistent
               mountPath: /var/lib/minecraft/persistent
