@@ -16,7 +16,7 @@ RUN $JAVA_HOME/bin/jlink \
          --output /artefacts/optimized-jdk-21
 
 ### Downloads all selected mods and datapacks from Modrinth
-FROM ghcr.io/nausicaea/nema:v0.1.3 AS downloader
+FROM ghcr.io/nausicaea/nema:v0.3.0 AS downloader
 ARG MINECRAFT_VERSION
 ARG FABRIC_LOADER_VERSION
 ARG FABRIC_LOADER_CHECKSUM
@@ -31,18 +31,20 @@ ADD --link --checksum=${FABRIC_LOADER_CHECKSUM} https://meta.fabricmc.net/v2/ver
 ADD --link --checksum=${OTEL_JAVAAGENT_CHECKSUM} https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar /artefacts/lib/opentelemetry-javaagent.jar
 ADD --link --checksum=${JOLOKIA_JAVAAGENT_CHECKSUM} https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-agent-jvm/${JOLOKIA_JAVAAGENT_VERSION}/jolokia-agent-jvm-${JOLOKIA_JAVAAGENT_VERSION}-javaagent.jar /artefacts/lib/jolokia-javaagent.jar
 ADD --link --checksum=${OTEL_MOD_CHECKSUM} https://github.com/nausicaea/opentelemetry-fabric/releases/download/v${OTEL_MOD_VERSION}/otel-${OTEL_MOD_VERSION}.jar /artefacts/fabric/otel-${OTEL_MOD_VERSION}.jar
-RUN --mount=type=secret,id=MODRINTH_PAT,env=MODRINTH_PAT --mount=type=bind,target=/tmp/Modrinth.toml,source=./Modrinth.toml --mount=type=bind,target=/tmp/Modrinth.lock,source=./Modrinth.lock --mount=type=bind,target=/tmp/provocation,source=./provocation <<-EOC
+RUN --mount=type=secret,id=MODRINTH_PAT,env=MODRINTH_PAT --mount=type=bind,target=/tmp/Modrinth.toml,source=./Modrinth.toml --mount=type=bind,target=/tmp/Modrinth.lock,source=./Modrinth.lock <<-EOC
 set -xe;
-/usr/local/bin/modrinth -o /artefacts --strict -s --lockfile /tmp/Modrinth.lock --manifest /tmp/Modrinth.toml;
-apk add --no-cache zip;
-cd /tmp/provocation;
-zip -r9 /tmp/provocation-v0.0.0.zip .;
-mv /tmp/provocation-v0.0.0.zip /artefacts/datapack/
+/usr/local/bin/nema -o /artefacts --strict -s --lockfile /tmp/Modrinth.lock --manifest /tmp/Modrinth.toml;
 EOC
 
 ### Builds and runs the final image
 FROM docker.io/library/alpine:3.22
-EXPOSE 30000/tcp 30000/udp
+LABEL org.opencontainers.image.title "Dvergr"
+LABEL org.opencontainers.image.description "A Minecraft server with an opinionated set of mods"
+LABEL org.opencontainers.image.authors "developer@nausicaea.net"
+LABEL org.opencontainers.image.source "https://github.com/nausicaea/dvergr"
+LABEL org.opencontainers.image.version "0.1.0+1_21_4"
+LABEL org.opencontainers.image.licenses "GPL-3.0-only"
+EXPOSE 25565/tcp 25565/udp
 VOLUME ["/var/lib/minecraft/persistent", "/etc/minecraft", "/var/cache/minecraft", "/var/log/minecraft"]
 ARG MINECRAFT_VERSION
 ENV MINECRAFT_SERVER_ID=minecraft

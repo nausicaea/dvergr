@@ -1,3 +1,5 @@
+minecraft_version = "1.21.4"
+
 [datapack]
 # Worldgen (Overworld)
 "william-wythers-overhauled-overworld-(datapack)" = "*"
@@ -29,17 +31,18 @@ polydecorations = "*"
 baby-fat-polymer = "*"
 polyfactory = "*"
 arcana-novum = "*"
-# server-storage = "*"
+# server-storage = "*"  # https://modrinth.com/mod/server-storage
 
 # Admin
 advanced-backups = "*"
 luckperms = "*"
-#melius-worldmanager = "*" # Cannot use Nether portals in overworld maps created by this mod
 stackdeobf = "*"
-coord-finder = "*"
+sessility = "*"
 # spark = "*"
 # otel-instrumentation-extension = "*"  # https://github.com/litetex-oss/mcm-otel-instrumentation-extension
 # fabricexporter = "*"  # https://modrinth.com/mod/fabricexporter
+ender-nexus = "*"  # https://modrinth.com/mod/ender-nexus
+# fabric-trade = "*"  # https://modrinth.com/mod/fabric-trade
 
 # Optimization
 ferrite-core = "*"
@@ -54,9 +57,5 @@ dynamic-lights = "*"
 leaves-be-gone = "*"
 lmd = "*"
 midnightlib = "*"
-sessility = "*"
 goml-reserved = "*"
-tpa = "*"
 vanilla-refresh = "*"
-passivemobs = "*"
-fleeing-animals = "*"

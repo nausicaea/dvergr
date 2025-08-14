@@ -59,10 +59,15 @@ if [ -n "${JOLOKIA_BIND_ADDRESS}" ]; then
     "
 fi
 
-exec /opt/java/customjdk/bin/java \
+trap 'echo "Got SIGTERM, shutting down"' TERM
+
+/opt/java/customjdk/bin/java \
     ${JAVA_OPTS} \
     -jar /usr/local/lib/fabric-launcher.jar \
     --serverId "${MINECRAFT_SERVER_ID:-minecraft}" \
     --universe /var/lib/minecraft/universe \
     --nogui \
-    "$@"
+    "$@" &
+
+child=$!
+wait "$child"
