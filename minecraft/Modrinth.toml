@@ -37,7 +37,6 @@ arcana-novum = "*"
 advanced-backups = "*"
 luckperms = "*"
 stackdeobf = "*"
-coord-finder = "*"
 sessility = "*"
 # spark = "*"
 # otel-instrumentation-extension = "*"  # https://github.com/litetex-oss/mcm-otel-instrumentation-extension
