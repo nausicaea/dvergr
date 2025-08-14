@@ -890,10 +890,10 @@ spec:
                 name: env-vars
           resources:
             requests:
-              cpu: "4"
+              cpu: "6"
               memory: 3Gi
             limits:
-              cpu: "4"
+              cpu: "6"
               memory: 3.5Gi
           stdin: true
           tty: true
