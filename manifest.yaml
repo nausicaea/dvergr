@@ -645,7 +645,7 @@ data:
     player-idle-timeout=0
     prevent-proxy-connections=false
     pvp=true
-    query.port=30000
+    query.port=25566
     rate-limit=0
     rcon.password=
     rcon.port=
@@ -656,7 +656,7 @@ data:
     resource-pack-prompt=
     resource-pack-sha1=
     server-ip=0.0.0.0
-    server-port=30000
+    server-port=25565
     simulation-distance=10
     spawn-animals=true
     spawn-monsters=true
@@ -720,6 +720,10 @@ spec:
       port: 25565
       protocol: TCP
       targetPort: minecraft
+    - name: query
+      port: 25566
+      protocol: UDP
+      targetPort: query
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -901,10 +905,10 @@ spec:
               mountPath: /var/log/minecraft
           ports:
             - name: minecraft
-              containerPort: 30000
+              containerPort: 25565
               protocol: TCP
-            - name: discovery
-              containerPort: 30000
+            - name: query
+              containerPort: 25566
               protocol: UDP
           livenessProbe:
             exec:
