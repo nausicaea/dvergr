@@ -614,7 +614,7 @@ data:
     debug=false
     difficulty=easy
     enable-command-block=false
-    enable-jmx-monitoring=true
+    enable-jmx-monitoring=false
     enable-query=true
     enable-rcon=false
     enable-status=true
