@@ -59,3 +59,4 @@ lmd = "*"
 midnightlib = "*"
 goml-reserved = "*"
 vanilla-refresh = "*"
+# rei = "*"  # REI specifies being incompatible with dedicated servers, but in-game messages contradict that.
