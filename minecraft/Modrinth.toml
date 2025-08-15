@@ -31,7 +31,7 @@ polydecorations = "*"
 baby-fat-polymer = "*"
 polyfactory = "*"
 arcana-novum = "*"
-# server-storage = "*"  # https://modrinth.com/mod/server-storage
+server-storage = "*"  # https://modrinth.com/mod/server-storage
 
 # Admin
 advanced-backups = "*"
