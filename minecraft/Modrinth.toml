@@ -18,7 +18,7 @@ new-in-town = "*"
 [fabric]
 # Worldgen
 tectonic = "*"
-mes-moogs-end-structures = "*"
+#enderscape = "*"
 
 # Polymerized
 polydex = "*"
@@ -27,7 +27,8 @@ polydecorations = "*"
 baby-fat-polymer = "*"
 polyfactory = "*"
 arcana-novum = "*"
-server-storage = "*"  # https://modrinth.com/mod/server-storage
+#enderscape-polymer = "*"
+extended-drawers-polymer = "*"
 
 # Admin
 advanced-backups = "*"
@@ -37,7 +38,6 @@ sessility = "*"
 # spark = "*"
 # otel-instrumentation-extension = "*"  # https://github.com/litetex-oss/mcm-otel-instrumentation-extension
 # fabricexporter = "*"  # https://modrinth.com/mod/fabricexporter
-ender-nexus = "*"  # https://modrinth.com/mod/ender-nexus
 # fabric-trade = "*"  # https://modrinth.com/mod/fabric-trade
 
 # Optimization
@@ -55,4 +55,5 @@ lmd = "*"
 midnightlib = "*"
 goml-reserved = "*"
 vanilla-refresh = "*"
-# rei = "*"  # REI specifies being incompatible with dedicated servers, but in-game messages contradict that.
+ender-nexus = "*"  # https://modrinth.com/mod/ender-nexus
+extended-drawers = "*"
