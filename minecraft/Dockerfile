@@ -42,7 +42,7 @@ LABEL org.opencontainers.image.title "Dvergr"
 LABEL org.opencontainers.image.description "A Minecraft server with an opinionated set of mods"
 LABEL org.opencontainers.image.authors "developer@nausicaea.net"
 LABEL org.opencontainers.image.source "https://github.com/nausicaea/dvergr"
-LABEL org.opencontainers.image.version "0.1.0+1_21_4"
+LABEL org.opencontainers.image.version "0.1.1+1_21_4"
 LABEL org.opencontainers.image.licenses "GPL-3.0-only"
 EXPOSE 25565/tcp 25565/udp
 VOLUME ["/var/lib/minecraft/persistent", "/etc/minecraft", "/var/cache/minecraft", "/var/log/minecraft"]
