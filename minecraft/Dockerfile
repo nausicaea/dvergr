@@ -16,7 +16,7 @@ RUN $JAVA_HOME/bin/jlink \
          --output /artefacts/optimized-jdk-21
 
 ### Downloads all selected mods and datapacks from Modrinth
-FROM ghcr.io/nausicaea/nema:v0.3.0 AS downloader
+FROM ghcr.io/nausicaea/nema:v0.4.0 AS downloader
 ARG MINECRAFT_VERSION
 ARG FABRIC_LOADER_VERSION
 ARG FABRIC_LOADER_CHECKSUM
@@ -33,7 +33,7 @@ ADD --link --checksum=${JOLOKIA_JAVAAGENT_CHECKSUM} https://search.maven.org/rem
 ADD --link --checksum=${OTEL_MOD_CHECKSUM} https://github.com/nausicaea/opentelemetry-fabric/releases/download/v${OTEL_MOD_VERSION}/otel-${OTEL_MOD_VERSION}.jar /artefacts/fabric/otel-${OTEL_MOD_VERSION}.jar
 RUN --mount=type=secret,id=MODRINTH_PAT,env=MODRINTH_PAT --mount=type=bind,target=/tmp/Modrinth.toml,source=./Modrinth.toml --mount=type=bind,target=/tmp/Modrinth.lock,source=./Modrinth.lock <<-EOC
 set -xe;
-/usr/local/bin/nema -o /artefacts --strict -s --lockfile /tmp/Modrinth.lock --manifest /tmp/Modrinth.toml;
+/usr/local/bin/nema -o /artefacts -s --lockfile /tmp/Modrinth.lock --manifest /tmp/Modrinth.toml;
 EOC
 
 ### Builds and runs the final image
@@ -42,7 +42,7 @@ LABEL org.opencontainers.image.title "Dvergr"
 LABEL org.opencontainers.image.description "A Minecraft server with an opinionated set of mods"
 LABEL org.opencontainers.image.authors "developer@nausicaea.net"
 LABEL org.opencontainers.image.source "https://github.com/nausicaea/dvergr"
-LABEL org.opencontainers.image.version "0.1.0+1_21_4"
+LABEL org.opencontainers.image.version "0.1.1+1_21_4"
 LABEL org.opencontainers.image.licenses "GPL-3.0-only"
 EXPOSE 25565/tcp 25565/udp
 VOLUME ["/var/lib/minecraft/persistent", "/etc/minecraft", "/var/cache/minecraft", "/var/log/minecraft"]
