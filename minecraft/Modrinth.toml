@@ -16,6 +16,7 @@ saturated = "*"
 sleep = "*"
 vegan-recipes = "*"
 new-in-town = "*"
+feathers-golden-eggs = "*"
 
 [fabric]
 # Worldgen (Overworld)
