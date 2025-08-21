@@ -14,8 +14,8 @@ services:
         OTEL_JAVAAGENT_CHECKSUM: sha256:f5fafdc5684139b04db461c420a46630acf598b44de951efd756e68a73778cfa
         JOLOKIA_JAVAAGENT_VERSION: 2.2.9
         JOLOKIA_JAVAAGENT_CHECKSUM: sha256:f5c4b31eeeb602888346ce7b545a885cb7caf932eff3b1b630e93cc720483429
-        OTEL_MOD_VERSION: 1.0.0+1-21-4
-        OTEL_MOD_CHECKSUM: sha256:c5e5ba4a07c9d03e3d4fd8e7232ac0fa8b34ef4c0264021f6d80924f0ba06013
+        OTEL_MOD_VERSION: 1.0.3+1-21-4
+        OTEL_MOD_CHECKSUM: sha256:bc42963ac09b56c715eaa1554b08e850517394893be482f07ba35531d4e31cad
     container_name: minecraft
     #entrypoint: ["/bin/sh", "-c", "while true; do sleep 1; done"]
     healthcheck:
