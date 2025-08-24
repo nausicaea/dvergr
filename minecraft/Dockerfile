@@ -33,7 +33,7 @@ ADD --link --checksum=${FABRIC_LOADER_CHECKSUM} https://meta.fabricmc.net/v2/ver
 ADD --link --checksum=${OTEL_JAVAAGENT_CHECKSUM} https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${OTEL_JAVAAGENT_VERSION}/opentelemetry-javaagent.jar /artefacts/lib/opentelemetry-javaagent.jar
 ADD --link --checksum=${JOLOKIA_JAVAAGENT_CHECKSUM} https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-agent-jvm/${JOLOKIA_JAVAAGENT_VERSION}/jolokia-agent-jvm-${JOLOKIA_JAVAAGENT_VERSION}-javaagent.jar /artefacts/lib/jolokia-javaagent.jar
 ADD --link --checksum=${OTEL_MOD_CHECKSUM} https://github.com/nausicaea/opentelemetry-fabric/releases/download/v${OTEL_MOD_VERSION}/otel-${OTEL_MOD_VERSION}.jar /artefacts/fabric/otel-${OTEL_MOD_VERSION}.jar
-ADD --link --checksum=$PARABURDOO_CHECKSUM} https://github.com/nausicaea/paraburdoo/releases/download/v${PARABURDOO_VERSION}/paraburdoo-${PARABURDOO_VERSION}.jar /artefacts/fabric/paraburdoo-${PARABURDOO_VERSION}.jar
+ADD --link --checksum=${PARABURDOO_CHECKSUM} https://github.com/nausicaea/paraburdoo/releases/download/v${PARABURDOO_VERSION}/paraburdoo-${PARABURDOO_VERSION}.jar /artefacts/fabric/paraburdoo-${PARABURDOO_VERSION}.jar
 RUN --mount=type=secret,id=MODRINTH_PAT,env=MODRINTH_PAT --mount=type=bind,target=/tmp/Modrinth.toml,source=./Modrinth.toml --mount=type=bind,target=/tmp/Modrinth.lock,source=./Modrinth.lock <<-EOC
 set -xe;
 /usr/local/bin/nema -o /artefacts -s --lockfile /tmp/Modrinth.lock --manifest /tmp/Modrinth.toml;
