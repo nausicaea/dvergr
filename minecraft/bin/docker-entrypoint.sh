@@ -51,14 +51,6 @@ if [ -n "${OTEL_EXPORTER_OTLP_ENDPOINT}" ]; then
     "
 fi
 
-if [ -n "${JOLOKIA_BIND_ADDRESS}" ]; then
-    JOLOKIA_HOST=$(echo "$JOLOKIA_BIND_ADDRESS" | awk -F: '{ print $1 }')
-    JOLOKIA_PORT=$(echo "$JOLOKIA_BIND_ADDRESS" | awk -F: '{ print $2 }')
-    JAVA_OPTS="$JAVA_OPTS \
-        -javaagent:/usr/local/lib/jolokia-javaagent.jar=port=$JOLOKIA_PORT,host=$JOLOKIA_HOST \
-    "
-fi
-
 trap 'echo "Got SIGTERM, shutting down"' TERM
 
 /opt/java/customjdk/bin/java \
