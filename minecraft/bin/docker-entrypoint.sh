@@ -44,7 +44,7 @@ JAVA_OPTS=" \
     -Dlog4j.configurationFile=/etc/minecraft/server/log4j2.xml \
 "
 
-if [ -n "${OTEL_EXPORTER_OTLP_ENDPOINT}" ]; then
+if [ "$OPENTELEMETRY_AGENT" = "1" ]; then
     JAVA_OPTS="$JAVA_OPTS \
         -Dotel.javaagent.configuration-file=/etc/minecraft/server/opentelemetry.properties \
         -javaagent:/usr/local/lib/opentelemetry-javaagent.jar \
