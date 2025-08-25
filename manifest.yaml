@@ -32,7 +32,7 @@ data:
   MINECRAFT_SERVER_ID: "minecraft"
   JAVA_INITIAL_MEM: "256M"
   JAVA_MAX_MEM: "3G"
-  OTEL_EXPORTER_OTLP_ENDPOINT: ""
+  OPENTELEMETRY_AGENT: "0"
   MAINTENANCE_MODE: "0"
 ---
 apiVersion: v1
@@ -673,7 +673,8 @@ data:
     otel.service.name=minecraft
     otel.javaagent.debug=false
     otel.javaagent.logging=simple
-    otel.exporter=otlp
+    otel.exporter.otlp.protocol=grpc
+    otel.exporter.otlp.endpoint=http://localhost:4317
     otel.traces.exporter=otlp
     otel.metrics.exporter=otlp
     otel.logs.exporter=otlp

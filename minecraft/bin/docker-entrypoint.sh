@@ -44,18 +44,10 @@ JAVA_OPTS=" \
     -Dlog4j.configurationFile=/etc/minecraft/server/log4j2.xml \
 "
 
-if [ -n "${OTEL_EXPORTER_OTLP_ENDPOINT}" ]; then
+if [ "$OPENTELEMETRY_AGENT" = "1" ]; then
     JAVA_OPTS="$JAVA_OPTS \
         -Dotel.javaagent.configuration-file=/etc/minecraft/server/opentelemetry.properties \
         -javaagent:/usr/local/lib/opentelemetry-javaagent.jar \
-    "
-fi
-
-if [ -n "${JOLOKIA_BIND_ADDRESS}" ]; then
-    JOLOKIA_HOST=$(echo "$JOLOKIA_BIND_ADDRESS" | awk -F: '{ print $1 }')
-    JOLOKIA_PORT=$(echo "$JOLOKIA_BIND_ADDRESS" | awk -F: '{ print $2 }')
-    JAVA_OPTS="$JAVA_OPTS \
-        -javaagent:/usr/local/lib/jolokia-javaagent.jar=port=$JOLOKIA_PORT,host=$JOLOKIA_HOST \
     "
 fi
 
